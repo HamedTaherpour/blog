@@ -226,7 +226,7 @@ async function seedUsers() {
     username: 'admin',
     email: 'skhammari@gmail.com',
     bio: 'Administrator of the platform with full access to all features.',
-    image: '/uploads/images/placeholder-image.png',
+    image: '/images/placeholder-image.png',
     role: 'ADMIN' as const,
     passwordHash: '$2b$12$C9puvbfKtLy66uXGjBivcOMDIZrpYaraDRPkAA36K1zrXrwPpGWbG',
   }
