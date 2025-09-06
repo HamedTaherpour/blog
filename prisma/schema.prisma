@@ -1,0 +1,274 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  username      String         @unique
+  email         String         @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  image         String?
+  bio           String?
+  role          UserRole       @default(USER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  accounts      Account[]
+  notifications Notification[] @relation("UserNotifications")
+  posts         Post[]         @relation("UserPosts")
+  sessions      Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Category {
+  id                  String     @id @default(cuid())
+  slug                String     @unique
+  name                String
+  description         String?
+  image               String?
+  color               String?    @default("blue")
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  metaTitle           String?
+  metaDescription     String?
+  metaKeywords        String?
+  canonicalUrl        String?
+  ogTitle             String?
+  ogDescription       String?
+  ogType              String?    @default("website")
+  ogImage             String?
+  twitterCard         String?    @default("summary")
+  twitterTitle        String?
+  twitterDescription  String?
+  twitterImage        String?
+  iconType            String?
+  iconMediaId         String?
+  coverMediaId        String?
+  ogImageMediaId      String?
+  twitterImageMediaId String?
+  parentId            String?
+  parent              Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children            Category[] @relation("CategoryHierarchy")
+  posts               Post[]
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  posts     PostTag[]
+}
+
+model Post {
+  id                 String     @id @default(cuid())
+  slug               String     @unique
+  title              String
+  excerpt            String?
+  content            String
+  coverImage         String?
+  postType           PostType   @default(IMAGE)
+  status             PostStatus @default(DRAFT)
+  publishedAt        DateTime?
+  scheduledAt        DateTime?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  metaTitle          String?
+  metaKeywords       String?
+  focusKeyword       String?
+  canonicalUrl       String?
+  metaDescription    String?
+  allowIndexing      Boolean    @default(true)
+  ogTitle            String?
+  ogImage            String?
+  ogType             String?    @default("article")
+  ogDescription      String?
+  twitterTitle       String?
+  twitterImage       String?
+  twitterCardType    String?    @default("summary")
+  twitterDescription String?
+  authorId           String
+  categoryId         String?
+  media              Media[]
+  category           Category?  @relation(fields: [categoryId], references: [id])
+  author             User       @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)
+  tags               PostTag[]
+  views              PostView[]
+}
+
+model PostTag {
+  postId String
+  tagId  String
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+
+model Media {
+  id          String   @id @default(cuid())
+  postId      String?
+  url         String
+  filename    String?
+  size        Int?
+  mimeType    String?
+  width       Int?
+  height      Int?
+  durationSec Int?
+  provider    String?
+  createdAt   DateTime @default(now())
+  post        Post?    @relation(fields: [postId], references: [id])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String
+  body      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PostView {
+  id        String   @id @default(cuid())
+  postId    String
+  ipHash    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model SiteSetting {
+  id        Int      @id @default(autoincrement())
+  siteName  String
+  siteDesc  String?
+  logoUrl   String?
+  twitter   String?
+  facebook  String?
+  instagram String?
+  
+  // Meta Tags Fields
+  siteAuthor        String?
+  metaTitle         String?
+  metaDescription   String?
+  metaKeywords      String?
+  focusKeyword      String?
+  canonicalUrl      String?
+  allowIndexing     Boolean  @default(true)
+  
+  // Open Graph Fields
+  ogTitle           String?
+  ogDescription     String?
+  ogType            String?  @default("website")
+  ogImage           String?
+  
+  // Twitter Card Fields
+  twitterTitle      String?
+  twitterDescription String?
+  twitterCardType   String?  @default("summary")
+  twitterImage      String?
+  
+  // Additional Social Media
+  youtube           String?
+  
+  updatedAt DateTime @updatedAt
+}
+
+model FooterMenuGroup {
+  id          String        @id @default(cuid())
+  title       String
+  order       Int           @default(0)
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  menuItems   FooterMenuItem[]
+}
+
+model FooterMenuItem {
+  id          String        @id @default(cuid())
+  label       String
+  href        String
+  order       Int           @default(0)
+  isActive    Boolean       @default(true)
+  isExternal  Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  groupId     String
+  group       FooterMenuGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+model HeaderMenuItem {
+  id          String        @id @default(cuid())
+  label       String
+  href        String
+  order       Int           @default(0)
+  isActive    Boolean       @default(true)
+  isExternal  Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  parentId    String?
+  parent      HeaderMenuItem? @relation("HeaderMenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    HeaderMenuItem[] @relation("HeaderMenuHierarchy")
+}
+
+enum UserRole {
+  USER
+  AUTHOR
+  EDITOR
+  ADMIN
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+enum PostType {
+  IMAGE
+  AUDIO
+  VIDEO
+  FILE
+}

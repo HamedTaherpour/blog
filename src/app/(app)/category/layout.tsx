@@ -1,0 +1,28 @@
+import { ApplicationLayout } from '@/app/(app)/application-layout'
+import BackgroundSection from '@/components/BackgroundSection'
+import SectionSubscribe2 from '@/components/SectionSubscribe2'
+import { getAuthors } from '@/data/authors'
+import { ReactNode } from 'react'
+
+interface Props {
+  children: ReactNode
+}
+
+const Layout: React.FC<Props> = async ({ children }) => {
+  const authors = await getAuthors()
+
+  return (
+    <ApplicationLayout>
+      {children}
+
+      <div className="container space-y-20 py-20 lg:space-y-28 lg:py-28">
+        
+
+        {/* SUBCRIBES */}
+        <SectionSubscribe2 />
+      </div>
+    </ApplicationLayout>
+  )
+}
+
+export default Layout
