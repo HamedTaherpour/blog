@@ -17,7 +17,7 @@ export const metadata: Metadata = await generateSiteMetadata()
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={beVietnamPro.className}>
+    <html lang="el" className={beVietnamPro.className}>
       <body className="bg-white text-base text-neutral-900 dark:bg-neutral-900 dark:text-neutral-200">
         <ThemeProvider>
           <SessionProvider>

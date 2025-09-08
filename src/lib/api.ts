@@ -55,6 +55,18 @@ export interface ApiCategory {
   description: string | null
   image: string | null
   color: string | null
+  metaTitle: string | null
+  metaDescription: string | null
+  metaKeywords: string | null
+  canonicalUrl: string | null
+  ogTitle: string | null
+  ogDescription: string | null
+  ogType: string | null
+  ogImage: string | null
+  twitterCard: string | null
+  twitterTitle: string | null
+  twitterDescription: string | null
+  twitterImage: string | null
   createdAt: Date
   updatedAt: Date
   _count: {
@@ -67,16 +79,12 @@ export function transformApiPost(apiPost: ApiPost): any {
   return {
     id: apiPost.id,
     title: apiPost.title,
+    content: apiPost.content,
     handle: apiPost.slug,
     excerpt: apiPost.excerpt || '',
     date: apiPost.createdAt.toISOString(),
     readingTime: Math.ceil(apiPost.content.length / 1000), // Estimate reading time
-    commentCount: 0, // Not available in current API
     viewCount: apiPost._count.views,
-    bookmarkCount: 0, // Not available in current API
-    bookmarked: false, // Not available in current API
-    likeCount: 0, // Not available in current API
-    liked: false, // Not available in current API
     postType: apiPost.postType === 'IMAGE' ? 'standard' : apiPost.postType === 'FILE' ? 'gallery' : apiPost.postType.toLowerCase() as 'audio' | 'video',
     status: apiPost.status.toLowerCase() as 'draft' | 'published',
     author: {
@@ -135,6 +143,20 @@ export function transformApiCategory(apiCategory: ApiCategory) {
       width: 1920,
       height: 1080,
     },
+    // SEO fields
+    metaTitle: apiCategory.metaTitle,
+    metaDescription: apiCategory.metaDescription,
+    metaKeywords: apiCategory.metaKeywords,
+    canonicalUrl: apiCategory.canonicalUrl,
+    ogTitle: apiCategory.ogTitle,
+    ogDescription: apiCategory.ogDescription,
+    ogType: apiCategory.ogType,
+    ogImage: apiCategory.ogImage,
+    twitterCard: apiCategory.twitterCard,
+    twitterTitle: apiCategory.twitterTitle,
+    twitterDescription: apiCategory.twitterDescription,
+    twitterImage: apiCategory.twitterImage,
+    image: apiCategory.image,
   }
 }
 
@@ -224,9 +246,11 @@ export async function fetchCategories() {
         }
       }
     },
-    orderBy: {
-      createdAt: 'desc'
-    }
+    orderBy: [
+      { level: 'asc' },
+      { order: 'asc' },
+      { createdAt: 'asc' }
+    ]
   })
 
   return categories.map(transformApiCategory)

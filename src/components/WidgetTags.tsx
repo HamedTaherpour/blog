@@ -12,7 +12,7 @@ interface Props {
 const WidgetTags: FC<Props> = ({ className = 'bg-neutral-100 dark:bg-neutral-800', tags }) => {
   return (
     <div className={clsx('widget-tags overflow-hidden rounded-3xl', className)}>
-      <WidgetHeading title="Suggested tags" viewAll={{ label: 'View all', href: '/#' }} />
+      <WidgetHeading title="Προτεινόμενες ετικέτες" viewAll={{ label: 'Προβολή όλων', href: '/#' }} />
       <div className="flex flex-wrap p-4 xl:p-5">
         {tags?.map((tag) => (
           <Tag className="mr-2 mb-2" key={tag.id} href={`/category/${tag.handle}`}>

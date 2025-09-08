@@ -12,7 +12,7 @@ interface Props {
 const WidgetPosts: FC<Props> = ({ className = 'bg-neutral-100 dark:bg-neutral-800', posts }) => {
   return (
     <div className={clsx('widget-posts overflow-hidden rounded-3xl', className)}>
-      <WidgetHeading title="Popular posts" viewAll={{ label: 'View all', href: '/#' }} />
+      <WidgetHeading title="Δημοφιλή άρθρα" viewAll={{ label: 'Προβολή όλων', href: '/#' }} />
       <div className="flex flex-col divide-y divide-neutral-200 dark:divide-neutral-700">
         {posts?.map((post) => (
           <Card3Small

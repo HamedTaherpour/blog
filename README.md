@@ -1,6 +1,6 @@
-# Ncmaz Next.js template
+# enpap-blog Next.js template
 
-To run the Ncmaz demo, first install the npm dependencies:
+To run the enpap-blog demo, first install the npm dependencies:
 
 ```bash
 npm install

@@ -6,10 +6,29 @@ import { writeFile, unlink } from 'fs/promises'
 import { join } from 'path'
 import { existsSync, mkdirSync } from 'fs'
 import { processSEOFields } from '@/lib/seo-utils'
+import { canAccess } from '@/lib/api-middleware'
+import { UserRole } from '@/lib/permissions'
+import { triggerSitemapRegeneration, shouldRegenerateSitemap } from '@/lib/sitemap-utils'
+
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
+    
+    // Check if user has permission to read posts
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 })
+    }
+
+    const hasPermission = canAccess(session.user.role as UserRole, 'posts', 'read')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to read posts',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
+
     const post = await prisma.post.findUnique({
       where: { id },
       include: {
@@ -47,6 +66,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ message: 'Post not found' }, { status: 404 })
     }
 
+    // For AUTHOR role, only allow access to their own posts
+    if (session.user.role === 'AUTHOR' && post.authorId !== session.user.id) {
+      return NextResponse.json({ 
+        message: 'You can only access your own posts',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
+
     return NextResponse.json(post)
   } catch (error) {
     console.error('Error fetching post:', error)
@@ -60,6 +87,15 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if user has permission to update posts
+    const hasPermission = canAccess(session.user.role as UserRole, 'posts', 'update')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to update posts',
+        userRole: session.user.role 
+      }, { status: 403 })
     }
 
     const formData = await request.formData()
@@ -95,7 +131,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ message: 'Title, slug, and post type are required' }, { status: 400 })
     }
 
-    // Check if post exists and user owns it
+    // Check if post exists
     const existingPost = await prisma.post.findUnique({
       where: { id },
       include: { author: true },
@@ -105,8 +141,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ message: 'Post not found' }, { status: 404 })
     }
 
-    if (existingPost.authorId !== session.user.id) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 403 })
+    // For AUTHOR role, only allow editing their own posts
+    if (session.user.role === 'AUTHOR' && existingPost.authorId !== session.user.id) {
+      return NextResponse.json({ 
+        message: 'You can only edit your own posts',
+        userRole: session.user.role 
+      }, { status: 403 })
     }
 
     // Check if slug already exists (excluding current post)
@@ -378,6 +418,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       },
     })
 
+    // Trigger sitemap regeneration if needed
+    if (shouldRegenerateSitemap(existingPost.status, post.status)) {
+      await triggerSitemapRegeneration()
+    }
+
     return NextResponse.json(post)
   } catch (error) {
     console.error('Error updating post:', error)
@@ -393,7 +438,16 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if post exists and user owns it
+    // Check if user has permission to delete posts
+    const hasPermission = canAccess(session.user.role as UserRole, 'posts', 'delete')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to delete posts',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
+
+    // Check if post exists
     const post = await prisma.post.findUnique({
       where: { id },
       include: { 
@@ -406,8 +460,12 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ message: 'Post not found' }, { status: 404 })
     }
 
-    if (post.authorId !== session.user.id) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 403 })
+    // For AUTHOR role, only allow deleting their own posts
+    if (session.user.role === 'AUTHOR' && post.authorId !== session.user.id) {
+      return NextResponse.json({ 
+        message: 'You can only delete your own posts',
+        userRole: session.user.role 
+      }, { status: 403 })
     }
 
     // Delete associated files from disk
@@ -425,6 +483,11 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     await prisma.post.delete({
       where: { id },
     })
+
+    // Trigger sitemap regeneration if the deleted post was published
+    if (post.status === 'PUBLISHED') {
+      await triggerSitemapRegeneration()
+    }
 
     return NextResponse.json({ message: 'Post deleted successfully' })
   } catch (error) {

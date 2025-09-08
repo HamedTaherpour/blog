@@ -26,6 +26,9 @@ async function main() {
   // Step 7: Seed Site Settings
   await seedSiteSettings()
 
+  // Step 8: Seed Social Media Links
+  await seedSocialMediaLinks()
+
   console.log('✅ Seed completed successfully!')
 }
 
@@ -35,63 +38,63 @@ async function seedCategories() {
   const categories = [
     {
       slug: 'technology',
-      name: 'Technology',
-      description: 'Latest technology news, gadgets, and innovations',
+      name: 'Τεχνολογία',
+      description: 'Τελευταία νέα τεχνολογίας, gadgets και καινοτομίες',
       image: '/uploads/category/mac-book.jpg',
       color: 'blue',
-      metaTitle: 'Technology News & Reviews',
-      metaDescription: 'Stay updated with the latest technology trends, gadget reviews, and tech innovations',
-      metaKeywords: 'technology, gadgets, tech news, innovation, reviews',
+      metaTitle: 'Νέα & Αξιολογήσεις Τεχνολογίας',
+      metaDescription: 'Μείνετε ενημερωμένοι με τις τελευταίες τάσεις τεχνολογίας, αξιολογήσεις gadgets και καινοτομίες',
+      metaKeywords: 'τεχνολογία, gadgets, νέα τεχνολογίας, καινοτομία, αξιολογήσεις',
     },
     {
       slug: 'mobile-devices',
-      name: 'Mobile Devices',
-      description: 'Smartphones, tablets, and mobile accessories',
+      name: 'Κινητές Συσκευές',
+      description: 'Smartphones, tablets και αξεσουάρ κινητών',
       image: '/uploads/category/iPad.jpg',
       color: 'purple',
-      metaTitle: 'Mobile Devices & Accessories',
-      metaDescription: 'Discover the latest mobile devices, smartphones, tablets and accessories',
-      metaKeywords: 'mobile, smartphone, tablet, accessories, iOS, Android',
+      metaTitle: 'Κινητές Συσκευές & Αξεσουάρ',
+      metaDescription: 'Ανακαλύψτε τις τελευταίες κινητές συσκευές, smartphones, tablets και αξεσουάρ',
+      metaKeywords: 'κινητό, smartphone, tablet, αξεσουάρ, iOS, Android',
     },
     {
       slug: 'wearables',
       name: 'Wearables',
-      description: 'Smartwatches, fitness trackers, and wearable technology',
+      description: 'Smartwatches, fitness trackers και φορετή τεχνολογία',
       image: '/uploads/category/apple-watch.jpg',
       color: 'green',
-      metaTitle: 'Wearable Technology',
-      metaDescription: 'Explore smartwatches, fitness trackers, and wearable devices',
+      metaTitle: 'Φορετή Τεχνολογία',
+      metaDescription: 'Εξερευνήστε smartwatches, fitness trackers και φορετές συσκευές',
       metaKeywords: 'wearables, smartwatch, fitness tracker, health tech',
     },
     {
       slug: 'audio',
-      name: 'Audio',
-      description: 'Headphones, speakers, and audio equipment',
+      name: 'Ήχος',
+      description: 'Ακουστικά, ηχεία και ηχητικός εξοπλισμός',
       image: '/uploads/category/air-pods.jpg',
       color: 'orange',
-      metaTitle: 'Audio Equipment & Accessories',
-      metaDescription: 'Find the best headphones, speakers, and audio equipment',
-      metaKeywords: 'audio, headphones, speakers, sound, music',
+      metaTitle: 'Ηχητικός Εξοπλισμός & Αξεσουάρ',
+      metaDescription: 'Βρείτε τα καλύτερα ακουστικά, ηχεία και ηχητικό εξοπλισμό',
+      metaKeywords: 'ήχος, ακουστικά, ηχεία, sound, music',
     },
     {
       slug: 'automotive',
-      name: 'Automotive',
-      description: 'Cars, electric vehicles, and automotive technology',
+      name: 'Αυτοκίνητο',
+      description: 'Αυτοκίνητα, ηλεκτρικά οχήματα και τεχνολογία αυτοκινήτου',
       image: '/uploads/category/car.jpg',
       color: 'red',
-      metaTitle: 'Automotive Technology',
-      metaDescription: 'Latest automotive news, electric vehicles, and car technology',
-      metaKeywords: 'automotive, cars, electric vehicles, auto tech',
+      metaTitle: 'Τεχνολογία Αυτοκινήτου',
+      metaDescription: 'Τελευταία νέα αυτοκινήτου, ηλεκτρικά οχήματα και τεχνολογία',
+      metaKeywords: 'αυτοκίνητο, ηλεκτρικά οχήματα, auto tech',
     },
     {
       slug: 'entertainment',
-      name: 'Entertainment',
-      description: 'TV, streaming, gaming, and entertainment technology',
+      name: 'Ψυχαγωγία',
+      description: 'TV, streaming, gaming και τεχνολογία ψυχαγωγίας',
       image: '/uploads/category/tv.jpg',
       color: 'indigo',
-      metaTitle: 'Entertainment Technology',
-      metaDescription: 'Entertainment tech including TVs, streaming, gaming, and media',
-      metaKeywords: 'entertainment, TV, streaming, gaming, media',
+      metaTitle: 'Τεχνολογία Ψυχαγωγίας',
+      metaDescription: 'Τεχνολογία ψυχαγωγίας: TVs, streaming, gaming και media',
+      metaKeywords: 'ψυχαγωγία, TV, streaming, gaming, media',
     },
   ]
 
@@ -119,11 +122,11 @@ async function seedTags() {
   const tags = [
     {
       slug: 'tech-news',
-      name: 'Tech News',
+      name: 'Τεχνολογικά Νέα',
     },
     {
       slug: 'reviews',
-      name: 'Reviews',
+      name: 'Αξιολογήσεις',
     },
     {
       slug: 'smartphone',
@@ -143,19 +146,19 @@ async function seedTags() {
     },
     {
       slug: 'headphones',
-      name: 'Headphones',
+      name: 'Ακουστικά',
     },
     {
       slug: 'speakers',
-      name: 'Speakers',
+      name: 'Ηχεία',
     },
     {
       slug: 'electric-car',
-      name: 'Electric Car',
+      name: 'Ηλεκτρικό Αυτοκίνητο',
     },
     {
       slug: 'automotive-tech',
-      name: 'Automotive Tech',
+      name: 'Τεχνολογία Αυτοκινήτου',
     },
     {
       slug: 'tv',
@@ -175,7 +178,7 @@ async function seedTags() {
     },
     {
       slug: 'innovation',
-      name: 'Innovation',
+      name: 'Καινοτομία',
     },
     {
       slug: 'apple',
@@ -191,7 +194,7 @@ async function seedTags() {
     },
     {
       slug: 'wireless',
-      name: 'Wireless',
+      name: 'Ασύρματο',
     },
     {
       slug: 'bluetooth',
@@ -573,49 +576,49 @@ async function seedHeaderMenus() {
 
   const headerMenuItems = [
     {
-      label: 'Home',
+      label: 'Αρχική',
       href: '/',
       order: 1,
       isActive: true,
       isExternal: false,
     },
     {
-      label: 'Technology',
+      label: 'Τεχνολογία',
       href: '/category/technology',
       order: 2,
       isActive: true,
       isExternal: false,
     },
     {
-      label: 'Mobile Devices',
+      label: 'Κινητές Συσκευές',
       href: '/category/mobile-devices',
       order: 3,
       isActive: true,
       isExternal: false,
     },
     {
-      label: 'Audio',
+      label: 'Ήχος',
       href: '/category/audio',
       order: 4,
       isActive: true,
       isExternal: false,
     },
     {
-      label: 'Entertainment',
+      label: 'Ψυχαγωγία',
       href: '/category/entertainment',
       order: 5,
       isActive: true,
       isExternal: false,
     },
     {
-      label: 'About',
+      label: 'Σχετικά',
       href: '/about',
       order: 6,
       isActive: true,
       isExternal: false,
     },
     {
-      label: 'Contact',
+      label: 'Επικοινωνία',
       href: '/contact',
       order: 7,
       isActive: true,
@@ -649,47 +652,47 @@ async function seedFooterMenus() {
 
   const footerMenuGroups = [
     {
-      title: 'Getting Started',
+      title: 'Ξεκινώντας',
       order: 1,
       menuItems: [
-        { label: 'Installation', href: '/docs/installation', order: 1, isExternal: false },
-        { label: 'Release Notes', href: '/docs/release-notes', order: 2, isExternal: false },
-        { label: 'Upgrade Guide', href: '/docs/upgrade', order: 3, isExternal: false },
-        { label: 'Browser Support', href: '/docs/browser-support', order: 4, isExternal: false },
-        { label: 'Editor Support', href: '/docs/editor-support', order: 5, isExternal: false },
+        { label: 'Εγκατάσταση', href: '/docs/installation', order: 1, isExternal: false },
+        { label: 'Σημειώσεις Έκδοσης', href: '/docs/release-notes', order: 2, isExternal: false },
+        { label: 'Οδηγός Αναβάθμισης', href: '/docs/upgrade', order: 3, isExternal: false },
+        { label: 'Υποστήριξη Browser', href: '/docs/browser-support', order: 4, isExternal: false },
+        { label: 'Υποστήριξη Editor', href: '/docs/editor-support', order: 5, isExternal: false },
       ]
     },
     {
-      title: 'Explore',
+      title: 'Εξερεύνηση',
       order: 2,
       menuItems: [
-        { label: 'Design Features', href: '/features/design', order: 1, isExternal: false },
-        { label: 'Prototyping', href: '/features/prototyping', order: 2, isExternal: false },
-        { label: 'Design Systems', href: '/features/design-systems', order: 3, isExternal: false },
-        { label: 'Pricing', href: '/pricing', order: 4, isExternal: false },
-        { label: 'Customers', href: '/customers', order: 5, isExternal: false },
+        { label: 'Χαρακτηριστικά Σχεδιασμού', href: '/features/design', order: 1, isExternal: false },
+        { label: 'Πρωτοτυποποίηση', href: '/features/prototyping', order: 2, isExternal: false },
+        { label: 'Συστήματα Σχεδιασμού', href: '/features/design-systems', order: 3, isExternal: false },
+        { label: 'Τιμολόγηση', href: '/pricing', order: 4, isExternal: false },
+        { label: 'Πελάτες', href: '/customers', order: 5, isExternal: false },
       ]
     },
     {
-      title: 'Resources',
+      title: 'Πόροι',
       order: 3,
       menuItems: [
-        { label: 'Best Practices', href: '/resources/best-practices', order: 1, isExternal: false },
-        { label: 'Support', href: '/support', order: 2, isExternal: false },
-        { label: 'Developers', href: '/developers', order: 3, isExternal: false },
-        { label: 'Learn Design', href: '/learn', order: 4, isExternal: false },
-        { label: "What's New", href: '/whats-new', order: 5, isExternal: false },
+        { label: 'Καλές Πρακτικές', href: '/resources/best-practices', order: 1, isExternal: false },
+        { label: 'Υποστήριξη', href: '/support', order: 2, isExternal: false },
+        { label: 'Προγραμματιστές', href: '/developers', order: 3, isExternal: false },
+        { label: 'Μάθε Σχεδιασμό', href: '/learn', order: 4, isExternal: false },
+        { label: 'Τι Νέο Υπάρχει', href: '/whats-new', order: 5, isExternal: false },
       ]
     },
     {
-      title: 'Community',
+      title: 'Κοινότητα',
       order: 4,
       menuItems: [
-        { label: 'Discussion Forums', href: 'https://community.example.com', order: 1, isExternal: true },
-        { label: 'Code of Conduct', href: '/community/code-of-conduct', order: 2, isExternal: false },
-        { label: 'Community Resources', href: '/community/resources', order: 3, isExternal: false },
-        { label: 'Contributing', href: '/community/contributing', order: 4, isExternal: false },
-        { label: 'Concurrent Mode', href: '/community/concurrent-mode', order: 5, isExternal: false },
+        { label: 'Φόρουμ Συζητήσεων', href: 'https://community.example.com', order: 1, isExternal: true },
+        { label: 'Κώδικας Δεοντολογίας', href: '/community/code-of-conduct', order: 2, isExternal: false },
+        { label: 'Πόροι Κοινότητας', href: '/community/resources', order: 3, isExternal: false },
+        { label: 'Συνεισφορά', href: '/community/contributing', order: 4, isExternal: false },
+        { label: 'Λειτουργία Concurrent', href: '/community/concurrent-mode', order: 5, isExternal: false },
       ]
     }
   ]
@@ -733,9 +736,7 @@ async function seedSiteSettings() {
   console.log('⚙️ Seeding site settings...')
 
   // Check if site settings already exist
-  const existingSettings = await prisma.siteSetting.findUnique({
-    where: { id: 1 }
-  })
+  const existingSettings = await prisma.siteSetting.findFirst()
 
   if (existingSettings) {
     console.log('⚠️  Site settings already exist, skipping...')
@@ -745,37 +746,30 @@ async function seedSiteSettings() {
   // Create default site settings
   const siteSettings = await prisma.siteSetting.create({
     data: {
-      id: 1, // Explicitly set ID to 1
-      siteName: 'NCMAZ Blog',
-      siteDesc: 'A modern blog platform for sharing articles and news',
+      siteName: 'enpap-blog Blog',
+      siteDesc: 'Μια σύγχρονη πλατφόρμα blog για κοινοποίηση άρθρων και ειδήσεων',
       logoUrl: '/images/logo.png',
-      
-      // Social Media Links
-      twitter: 'https://twitter.com/ncmaz',
-      facebook: 'https://facebook.com/ncmaz',
-      instagram: 'https://instagram.com/ncmaz',
-      youtube: 'https://youtube.com/@ncmaz',
-      
+
       // Site Author
-      siteAuthor: 'NCMAZ Team',
+      siteAuthor: 'enpap-blog Team',
       
       // Meta Tags
-      metaTitle: 'NCMAZ Blog - Modern Blog Platform',
-      metaDescription: 'Read the best articles and news about technology, business, and daily life on NCMAZ Blog',
-      metaKeywords: 'blog, articles, news, technology, business, lifestyle',
-      focusKeyword: 'modern blog',
-      canonicalUrl: 'https://ncmaz.com',
+      metaTitle: 'enpap-blog Blog - Σύγχρονη Πλατφόρμα Blog',
+      metaDescription: 'Διαβάστε τα καλύτερα άρθρα και ειδήσεις για τεχνολογία, επιχειρήσεις και καθημερινή ζωή στο enpap-blog Blog',
+      metaKeywords: 'blog, άρθρα, ειδήσεις, τεχνολογία, επιχειρήσεις, lifestyle',
+      focusKeyword: 'σύγχρονο blog',
+      canonicalUrl: 'https://enpap-blog.com',
       allowIndexing: true,
       
       // Open Graph
-      ogTitle: 'NCMAZ Blog - Modern Blog Platform',
-      ogDescription: 'The best articles and news about technology, business, and daily life',
+      ogTitle: 'enpap-blog Blog - Σύγχρονη Πλατφόρμα Blog',
+      ogDescription: 'Τα καλύτερα άρθρα και ειδήσεις για τεχνολογία, επιχειρήσεις και καθημερινή ζωή',
       ogType: 'website',
       ogImage: '/images/og-image.jpg',
       
       // Twitter Card
-      twitterTitle: 'NCMAZ Blog - Modern Blog Platform',
-      twitterDescription: 'The best articles and news about technology, business, and daily life',
+      twitterTitle: 'enpap-blog Blog - Σύγχρονη Πλατφόρμα Blog',
+      twitterDescription: 'Τα καλύτερα άρθρα και ειδήσεις για τεχνολογία, επιχειρήσεις και καθημερινή ζωή',
       twitterCardType: 'summary_large_image',
       twitterImage: '/images/twitter-card.jpg',
     }
@@ -784,6 +778,81 @@ async function seedSiteSettings() {
   console.log('✅ Site settings created successfully!')
   console.log(`   Site Name: ${siteSettings.siteName}`)
   console.log(`   Site Description: ${siteSettings.siteDesc}`)
+}
+
+async function seedSocialMediaLinks() {
+  console.log('🔗 Seeding social media links...')
+
+  const socialMediaLinks = [
+    {
+      name: 'Facebook',
+      url: 'https://facebook.com/enpap-blog',
+      iconName: 'Facebook01Icon',
+      iconType: 'hugeicons',
+      order: 1,
+      isActive: true,
+    },
+    {
+      name: 'Twitter',
+      url: 'https://twitter.com/enpap-blog',
+      iconName: 'NewTwitterIcon',
+      iconType: 'hugeicons',
+      order: 2,
+      isActive: true,
+    },
+    {
+      name: 'Instagram',
+      url: 'https://instagram.com/enpap-blog',
+      iconName: 'InstagramIcon',
+      iconType: 'hugeicons',
+      order: 3,
+      isActive: true,
+    },
+    {
+      name: 'YouTube',
+      url: 'https://youtube.com/@enpap-blog',
+      iconName: 'YoutubeIcon',
+      iconType: 'hugeicons',
+      order: 4,
+      isActive: true,
+    },
+    {
+      name: 'LinkedIn',
+      url: 'https://linkedin.com/company/enpap-blog',
+      iconName: 'LinkedinIcon',
+      iconType: 'hugeicons',
+      order: 5,
+      isActive: true,
+    },
+    {
+      name: 'GitHub',
+      url: 'https://github.com/enpap-blog',
+      iconName: 'GithubIcon',
+      iconType: 'hugeicons',
+      order: 6,
+      isActive: true,
+    },
+  ]
+
+  for (const linkData of socialMediaLinks) {
+    const existingLink = await prisma.socialMediaLink.findFirst({
+      where: { 
+        name: linkData.name,
+        url: linkData.url 
+      }
+    })
+
+    if (!existingLink) {
+      const link = await prisma.socialMediaLink.create({
+        data: linkData,
+      })
+      console.log(`✅ Created social media link: ${link.name}`)
+    } else {
+      console.log(`⚠️  Social media link already exists: ${linkData.name}`)
+    }
+  }
+
+  console.log('🔗 Social media links seeding completed!')
 }
 
 main()

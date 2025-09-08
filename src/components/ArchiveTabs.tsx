@@ -19,16 +19,15 @@ const ArchiveTabsComponent: FC<Props> = ({ className, tabs }) => {
     currentTab = tabs[0].value
   }
 
-  // Get a new searchParams string by merging the current
-  // searchParams with a provided key/value pair
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
+  const createTabHref = useCallback(
+    (value: string) => {
       const params = new URLSearchParams(searchParams.toString())
-      params.set(name, value)
-
-      return params.toString()
+      params.set('tab', value)
+      // Reset page when switching tab
+      params.delete('page')
+      return pathname + '?' + params.toString()
     },
-    [searchParams]
+    [pathname, searchParams]
   )
 
   return (
@@ -41,7 +40,7 @@ const ArchiveTabsComponent: FC<Props> = ({ className, tabs }) => {
             {tab.name}
           </Button>
         ) : (
-          <Button outline key={tab.value} href={pathname + '?' + createQueryString('tab', tab.value)} scroll={false}>
+          <Button outline key={tab.value} href={createTabHref(tab.value)} scroll={false}>
             <HugeiconsIcon icon={tab.icon} size={20} />
             {tab.name}
           </Button>

@@ -34,6 +34,38 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   const acceptedTypes = acceptedTypesList[postType] || acceptedTypesList.IMAGE
 
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.currentTarget.classList.add('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20')
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20')
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.currentTarget.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20')
+    
+    const droppedFiles = Array.from(e.dataTransfer.files)
+    const validFiles = droppedFiles.filter((file) => {
+      return acceptedTypes.some((type) => {
+        if (type.endsWith('/*')) {
+          return file.type.startsWith(type.slice(0, -1))
+        }
+        return file.type === type
+      })
+    })
+
+    if (files.length + validFiles.length > maxFiles) {
+      alert(`Maximum ${maxFiles} files allowed`)
+      return
+    }
+
+    onFilesChange([...files, ...validFiles])
+  }, [files, onFilesChange, maxFiles, acceptedTypes])
+
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFiles = Array.from(e.target.files || [])
@@ -89,11 +121,15 @@ const FileUpload: React.FC<FileUploadProps> = ({
       <div>
         <label className="mb-2 block text-xs font-medium text-gray-700 dark:text-gray-300">{label}</label>
         <Card
-          className={`transition-colors ${
+          className={`transition-colors cursor-pointer ${
             false
               ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
               : 'border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500'
           }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
         >
           <CardContent className="!px-4">
             <div className="flex items-center justify-between">
@@ -127,7 +163,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 type="file"
                 className="sr-only"
                 accept={acceptedTypes.join(',')}
-                multiple={false}
+                multiple={maxFiles > 1}
                 onChange={handleFileSelect}
               />
             </div>

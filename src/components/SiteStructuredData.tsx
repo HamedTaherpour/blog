@@ -16,11 +16,27 @@ export function SiteStructuredData() {
       description: settings.siteDesc,
       url: typeof window !== 'undefined' ? window.location.origin : '',
       logo: settings.logoUrl ? `${typeof window !== 'undefined' ? window.location.origin : ''}${settings.logoUrl}` : undefined,
+      author: settings.siteAuthor ? {
+        '@type': 'Person',
+        name: settings.siteAuthor,
+      } : undefined,
+      publisher: {
+        '@type': 'Organization',
+        name: settings.siteName,
+        url: typeof window !== 'undefined' ? window.location.origin : '',
+        logo: settings.logoUrl ? {
+          '@type': 'ImageObject',
+          url: `${typeof window !== 'undefined' ? window.location.origin : ''}${settings.logoUrl}`,
+        } : undefined,
+      },
       sameAs: [
         settings.twitter,
         settings.facebook,
         settings.instagram,
+        settings.youtube,
       ].filter(Boolean),
+      keywords: settings.metaKeywords || undefined,
+      inLanguage: 'en-US',
     }
 
     // Remove existing structured data script if any

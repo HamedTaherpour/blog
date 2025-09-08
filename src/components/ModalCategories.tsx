@@ -22,11 +22,11 @@ const ModalCategories: FC<Props> = ({ categories }) => {
       <>
         <Button type="button" color="white" onClick={() => setIsOpen(true)}>
           <HugeiconsIcon icon={NotificationSquareIcon} size={24} />
-          <span>Categories</span>
+          <span>Κατηγορίες</span>
           <ChevronDownIcon className="size-4" />
         </Button>
         <Dialog size="5xl" open={isOpen} onClose={setIsOpen}>
-          <DialogTitle>Discover other categories</DialogTitle>
+          <DialogTitle>Ανακαλύψτε άλλες κατηγορίες</DialogTitle>
           <DialogBody>
             <Divider className="my-6" />
             <div className="grid gap-6 sm:grid-cols-2 sm:py-2 md:grid-cols-3 md:gap-8 lg:grid-cols-4">
@@ -37,9 +37,9 @@ const ModalCategories: FC<Props> = ({ categories }) => {
           </DialogBody>
           <DialogActions>
             <Button plain onClick={() => setIsOpen(false)}>
-              Cancel
+              Ακύρωση
             </Button>
-            <Button onClick={() => setIsOpen(false)}>Close</Button>
+            <Button onClick={() => setIsOpen(false)}>Κλείσιμο</Button>
           </DialogActions>
         </Dialog>
       </>

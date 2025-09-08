@@ -84,7 +84,6 @@ const SingleContentContainer: FC<Props> = ({ post, className, tags }) => {
         >
           <TheContent content={content} />
         </div>
-
         {/* TAGS */}
         <div className="mx-auto flex max-w-(--breakpoint-md) flex-wrap">
           {tags.map((tag: any) => (
@@ -105,9 +104,7 @@ const SingleContentContainer: FC<Props> = ({ post, className, tags }) => {
             <Link className="text-lg font-semibold" href={`/author/${author.handle}`}>
               {author.name}
             </Link>
-            <p className="text-sm/relaxed dark:text-neutral-300">
-              {author.description}
-            </p>
+            <p className="text-sm/relaxed dark:text-neutral-300">{author.description}</p>
             {/* <SocialsList className="mt-2" /> */}
           </div>
         </div>

@@ -146,15 +146,34 @@ export default function NewPostPage() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to create post')
+        const errorData = await response.json()
+        
+        // Handle validation errors
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          errorData.errors.forEach((error: any) => {
+            toast.error(error.message || 'Validation error')
+          })
+        } else if (errorData.error) {
+          toast.error(errorData.error)
+        } else if (errorData.message) {
+          toast.error(errorData.message)
+        } else {
+          toast.error('Failed to create post')
+        }
+        return
       }
 
+      const result = await response.json()
       toast.success('Post created successfully!')
       router.push('/dashboard/posts')
     } catch (error) {
       console.error('Error creating post:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to create post')
+      
+      if (error instanceof Error) {
+        toast.error(error.message)
+      } else {
+        toast.error('An unexpected error occurred')
+      }
     } finally {
       setLoading(false)
     }
@@ -466,7 +485,7 @@ export default function NewPostPage() {
                   <Input
                     value={canonicalUrl}
                     onChange={(e) => setCanonicalUrl(e.target.value)}
-                    placeholder="https://example.com/post-url"
+                    placeholder="/post-url"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -537,7 +556,7 @@ export default function NewPostPage() {
                   <Input
                     value={ogImage}
                     onChange={(e) => setOgImage(e.target.value)}
-                    placeholder="https://example.com/image.jpg"
+                    placeholder="/image.jpg"
                   />
                 </div>
                 <div>

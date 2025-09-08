@@ -22,7 +22,7 @@ function ActionDropdown({ handle, title, author }: { handle: string; title: stri
 
   const actions = [
     {
-      name: 'Copy link',
+      name: 'Αντιγραφή συνδέσμου',
       icon: ClipboardIcon,
       onClick: () => {
         navigator.clipboard.writeText(window.location.href)
@@ -52,36 +52,36 @@ function ActionDropdown({ handle, title, author }: { handle: string; title: stri
       {/* DIALOG HIDE AUTHOR */}
       <Dialog open={isOpenDialogHideAuthor} onClose={() => setIsOpenDialogHideAuthor(false)}>
         <DialogTitle>
-          Hide this author? <span className="font-semibold">({author.name.trim()})</span>
+          Απόκρυψη αυτού του συγγραφέα? <span className="font-semibold">({author.name.trim()})</span>
         </DialogTitle>
         <DialogBody>
           <p>
-            Are you sure you want to hide the <span className="font-semibold">{author.name.trim()}</span>? This action
-            will hide all posts from this author.
+            Είστε σίγουροι ότι θέλετε να αποκρύψετε τον <span className="font-semibold">{author.name.trim()}</span>? Αυτή η ενέργεια
+            θα αποκρύψει όλα τα άρθρα από αυτόν τον συγγραφέα.
           </p>
         </DialogBody>
         <DialogActions>
           <Button plain onClick={() => setIsOpenDialogHideAuthor(false)}>
-            Cancel
+            Ακύρωση
           </Button>
-          <Button onClick={() => setIsOpenDialogHideAuthor(false)}>Hide</Button>
+          <Button onClick={() => setIsOpenDialogHideAuthor(false)}>Απόκρυψη</Button>
         </DialogActions>
       </Dialog>
 
       {/* DIALOG REPORT POST */}
       <Dialog open={isOpenDialogReportPost} onClose={() => setIsOpenDialogReportPost(false)}>
-        <DialogTitle>Report this post?</DialogTitle>
+        <DialogTitle>Αναφορά αυτού του άρθρου?</DialogTitle>
         <DialogBody>
           <p>
-            Are you sure you want to report the <span className="font-semibold">&quot;{title.trim()}&quot;</span>? This
-            action will report this post.
+            Είστε σίγουροι ότι θέλετε να αναφέρετε το <span className="font-semibold">&quot;{title.trim()}&quot;</span>? Αυτή η
+            ενέργεια θα αναφέρει αυτό το άρθρο.
           </p>
         </DialogBody>
         <DialogActions>
           <Button plain onClick={() => setIsOpenDialogReportPost(false)}>
-            Cancel
+            Ακύρωση
           </Button>
-          <Button onClick={() => setIsOpenDialogReportPost(false)}>Report</Button>
+          <Button onClick={() => setIsOpenDialogReportPost(false)}>Αναφορά</Button>
         </DialogActions>
       </Dialog>
     </>

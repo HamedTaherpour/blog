@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { authOptions } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
+import { canAccess } from '@/lib/api-middleware'
+import { UserRole } from '@/lib/permissions'
 
 export async function GET(
   request: NextRequest,
@@ -41,6 +45,21 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
+    
+    // Check authentication and permissions
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 })
+    }
+
+    const hasPermission = canAccess(session.user.role as UserRole, 'tags', 'update')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to update tags',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
+
     const body = await request.json()
     const { name, slug } = body
 
@@ -91,6 +110,20 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+    
+    // Check authentication and permissions
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 })
+    }
+
+    const hasPermission = canAccess(session.user.role as UserRole, 'tags', 'delete')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to delete tags',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
     // Check if tag exists
     const tag = await prisma.tag.findUnique({
       where: { id },

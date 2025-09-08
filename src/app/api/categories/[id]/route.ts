@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { writeFile, unlink } from 'fs/promises'
-import { join } from 'path'
-import { existsSync, mkdirSync } from 'fs'
-import { processCategorySEOFields } from '@/lib/category-seo-utils'
+import { authOptions } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
+import { canAccess } from '@/lib/api-middleware'
+import { UserRole } from '@/lib/permissions'
+import { 
+  getCategoryById, 
+  updateCategory, 
+  deleteCategory, 
+  getCategoryBreadcrumb,
+  UpdateCategoryData
+} from '@/lib/category-service'
 
 export async function GET(
   request: NextRequest,
@@ -11,11 +18,11 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-
-    const category = await prisma.category.findUnique({
-      where: { id }
-    })
-
+    const { searchParams } = new URL(request.url)
+    const includeBreadcrumb = searchParams.get('breadcrumb') === 'true'
+    
+    const category = await getCategoryById(id)
+    
     if (!category) {
       return NextResponse.json(
         { message: 'Category not found' },
@@ -23,7 +30,17 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(category)
+    let responseData: any = category
+
+    if (includeBreadcrumb) {
+      const breadcrumb = await getCategoryBreadcrumb(id)
+      responseData = {
+        ...category,
+        breadcrumb
+      }
+    }
+
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error('Error fetching category:', error)
     return NextResponse.json(
@@ -38,7 +55,20 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
+    // Check authentication and permissions
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 })
+    }
+
+    const hasPermission = canAccess(session.user.role as UserRole, 'categories', 'update')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to update categories',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
+
     const formData = await request.formData()
     
     // Basic category data
@@ -46,6 +76,7 @@ export async function PUT(
     const slug = formData.get('slug') as string
     const description = formData.get('description') as string
     const color = formData.get('color') as string
+    const order = formData.get('order') as string
     // SEO fields
     const metaTitle = formData.get('metaTitle') as string
     const metaDescription = formData.get('metaDescription') as string
@@ -75,9 +106,11 @@ export async function PUT(
       )
     }
 
-    // Check if slug already exists for other categories
+    const { id } = await params
+
+    // Check if slug already exists (excluding current category)
     const existingCategory = await prisma.category.findFirst({
-      where: {
+      where: { 
         slug,
         id: { not: id }
       }
@@ -90,113 +123,34 @@ export async function PUT(
       )
     }
 
-    // Handle file uploads
-    const uploadedMedia: any[] = []
-    const files = formData.getAll('files') as File[]
-    
-    for (const file of files) {
-      if (file.size > 0) {
-        // Generate unique filename
-        const timestamp = Date.now()
-        const fileName = file.name
-        const extension = fileName.split('.').pop()
-        const uniqueFileName = `${timestamp}-${fileName}`
-
-        // Create uploads directory if it doesn't exist
-        const uploadsDir = join(process.cwd(), 'public', 'uploads')
-        if (!existsSync(uploadsDir)) {
-          mkdirSync(uploadsDir, { recursive: true })
-        }
-
-        // Save file to disk
-        const bytes = await file.arrayBuffer()
-        const buffer = new Uint8Array(bytes)
-        const filePath = join(uploadsDir, uniqueFileName)
-        await writeFile(filePath, buffer)
-
-        // Save to database
-        const media = await prisma.media.create({
-          data: {
-            url: `/uploads/${uniqueFileName}`,
-            filename: fileName,
-            size: file.size,
-            mimeType: file.type,
-            postId: null, // Categories don't have posts
-          },
-        })
-        uploadedMedia.push(media)
-      }
+    const updateData: UpdateCategoryData = {
+      name,
+      slug,
+      description: description || undefined,
+      color: color || undefined,
+      order: order ? parseInt(order) : undefined,
+      parentId: parentId || undefined,
+      // SEO fields
+      metaTitle: metaTitle || undefined,
+      metaDescription: metaDescription || undefined,
+      metaKeywords: metaKeywords || undefined,
+      canonicalUrl: canonicalUrl || undefined,
+      // Open Graph fields
+      ogTitle: ogTitle || undefined,
+      ogDescription: ogDescription || undefined,
+      ogType: ogType || undefined,
+      ogImage: ogImage || undefined,
+      // Twitter Card fields
+      twitterCard: twitterCard || undefined,
+      twitterTitle: twitterTitle || undefined,
+      twitterDescription: twitterDescription || undefined,
+      twitterImage: twitterImage || undefined,
+      // Icon and Media fields
+      ogImageMediaId: ogImageMediaId || undefined,
+      twitterImageMediaId: twitterImageMediaId || undefined,
     }
 
-    // Get the first uploaded image as the category image, or keep existing
-    const categoryImage = uploadedMedia.find(m => m.mimeType?.startsWith('image/'))?.url || 
-                         formData.get('existingImage') as string || null
-
-    // Process SEO fields with auto-population and validation
-    const { processedFields: seoFields, validationResult } = processCategorySEOFields(
-      {
-        name,
-        description: description || null,
-        image: categoryImage
-      },
-      {
-        metaTitle: metaTitle || null,
-        metaDescription: metaDescription || null,
-        metaKeywords: metaKeywords || null,
-        canonicalUrl: canonicalUrl || null,
-        ogTitle: ogTitle || null,
-        ogDescription: ogDescription || null,
-        ogType: ogType || null,
-        ogImage: ogImage || null,
-        twitterCard: twitterCard || null,
-        twitterTitle: twitterTitle || null,
-        twitterDescription: twitterDescription || null,
-        twitterImage: twitterImage || null,
-      },
-      categoryImage
-    )
-
-    // Return SEO validation errors if any
-    if (!validationResult.isValid) {
-      return NextResponse.json(
-        { 
-          message: 'SEO validation failed', 
-          errors: validationResult.errors 
-        },
-        { status: 400 }
-      )
-    }
-
-    const category = await prisma.category.update({
-      where: { id },
-      data: {
-        name,
-        slug,
-        description: description || null,
-        image: categoryImage,
-        color: color || 'blue',
-        // SEO fields (processed with auto-population)
-        metaTitle: seoFields.metaTitle,
-        metaDescription: seoFields.metaDescription,
-        metaKeywords: seoFields.metaKeywords,
-        canonicalUrl: seoFields.canonicalUrl,
-        // Open Graph fields
-        ogTitle: seoFields.ogTitle,
-        ogDescription: seoFields.ogDescription,
-        ogType: seoFields.ogType,
-        ogImage: seoFields.ogImage,
-        // Twitter Card fields
-        twitterCard: seoFields.twitterCard,
-        twitterTitle: seoFields.twitterTitle,
-        twitterDescription: seoFields.twitterDescription,
-        twitterImage: seoFields.twitterImage,
-        // Icon and Media fields
-        ogImageMediaId: ogImageMediaId || null,
-        twitterImageMediaId: twitterImageMediaId || null,
-        // Parent category
-        parentId: parentId || null
-      }
-    })
+    const category = await updateCategory(id, updateData)
 
     return NextResponse.json(category)
   } catch (error) {
@@ -213,57 +167,22 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Check authentication and permissions
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 })
+    }
+
+    const hasPermission = canAccess(session.user.role as UserRole, 'categories', 'delete')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to delete categories',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
+
     const { id } = await params
-
-    // Check if category has posts
-    const categoryWithPosts = await prisma.category.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: {
-            posts: true
-          }
-        },
-        // Include media associated with this category
-        posts: {
-          include: {
-            media: true
-          }
-        }
-      }
-    })
-
-    if (!categoryWithPosts) {
-      return NextResponse.json(
-        { message: 'Category not found' },
-        { status: 404 }
-      )
-    }
-
-    if (categoryWithPosts._count.posts > 0) {
-      return NextResponse.json(
-        { message: 'Cannot delete category with existing posts' },
-        { status: 400 }
-      )
-    }
-
-    // Delete associated files from disk
-    // Get all media files associated with this category's posts
-    const allMedia = categoryWithPosts.posts.flatMap(post => post.media)
-    
-    for (const media of allMedia) {
-      try {
-        const filePath = join(process.cwd(), 'public', media.url)
-        await unlink(filePath)
-      } catch (error) {
-        console.warn(`Failed to delete file ${media.url}:`, error)
-        // Continue even if file deletion fails
-      }
-    }
-
-    await prisma.category.delete({
-      where: { id }
-    })
+    await deleteCategory(id)
 
     return NextResponse.json({ message: 'Category deleted successfully' })
   } catch (error) {

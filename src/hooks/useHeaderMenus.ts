@@ -6,8 +6,13 @@ interface HeaderMenuItem {
   label: string
   href: string
   order: number
+  level: number
+  path: string
   isActive: boolean
   isExternal: boolean
+  linkType: string
+  linkId: string | null
+  parentId: string | null
   children?: HeaderMenuItem[]
 }
 
@@ -22,7 +27,7 @@ export const useHeaderMenus = () => {
         setIsLoading(true)
         setError(null)
         
-        const response = await fetch('/api/header-menus')
+        const response = await fetch('/api/header-menus?active=true')
         if (!response.ok) {
           throw new Error('Failed to fetch header menus')
         }

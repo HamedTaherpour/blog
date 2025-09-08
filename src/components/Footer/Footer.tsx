@@ -1,20 +1,20 @@
 import { SiteSocialLinks } from '@/components/SiteSocialLinks'
-import { CustomLink } from '@/data/types'
 import { FooterMenuGroup } from '@/lib/footer-service'
+import { SiteSettings } from '@/lib/settings-service'
 import Logo from '@/shared/Logo'
 import React from 'react'
 
 export interface WidgetFooterMenu {
   id: string
   title: string
-  menus: CustomLink[]
 }
 
 interface FooterProps {
   footerMenus: FooterMenuGroup[]
+  siteSettings?: SiteSettings
 }
 
-const Footer: React.FC<FooterProps> = ({ footerMenus }) => {
+const Footer: React.FC<FooterProps> = ({ footerMenus, siteSettings }) => {
   const renderDatabaseFooterMenu = (group: FooterMenuGroup) => {
     if (!group.isActive) return null
 
@@ -49,7 +49,7 @@ const Footer: React.FC<FooterProps> = ({ footerMenus }) => {
         <div className="container grid grid-cols-2 gap-x-5 gap-y-10 sm:gap-x-8 md:grid-cols-4 lg:grid-cols-5 lg:gap-x-10">
           <div className="col-span-2 grid grid-cols-4 gap-5 md:col-span-4 lg:flex lg:flex-col lg:md:col-span-1">
             <div className="col-span-2 md:col-span-1">
-              <Logo />  
+              <Logo logoUrl={siteSettings?.logoUrl || ''} />
             </div>
             <div className="col-span-2 flex items-center md:col-span-3">
               <SiteSocialLinks className="flex gap-4" />

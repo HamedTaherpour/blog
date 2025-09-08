@@ -10,8 +10,8 @@ import { fetchAudioPosts, fetchCategories, fetchMostViewedPosts, fetchPosts } fr
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Home',
-  description: 'Home page of the application showcasing various sections and posts.',
+  title: 'Αρχική',
+  description: 'Αρχική σελίδα της εφαρμογής που παρουσιάζει διάφορες ενότητες και άρθρα.',
 }
 
 const Page = async () => {
@@ -33,15 +33,15 @@ const Page = async () => {
     <div className="relative pb-28 lg:pb-32">
       <div className="relative container space-y-28 lg:space-y-32">
         <SectionLargeSlider
-          heading="Editor's pick"
-          subHeading="The most outstanding articles"
+          heading="Επιλογή Εκδότη"
+          subHeading="Τα πιο εξαιρετικά άρθρα"
           className="pt-10 lg:pt-20"
           posts={posts}
         />
 
         <SectionSliderNewCategories
-          heading="Explore categories"
-          subHeading="Explore the categories"
+          heading="Εξερευνήστε κατηγορίες"
+          subHeading="Εξερευνήστε τις κατηγορίες"
           categories={categories.slice(0, 10)}
         />
 
@@ -49,31 +49,31 @@ const Page = async () => {
           <BackgroundSection />
           <SectionSliderPosts
             postCardName="card10V2"
-            heading="Explore latest articles"
-            subHeading="Click on the icon to enjoy the music"
+            heading="Εξερευνήστε τα τελευταία άρθρα"
+            subHeading="Κάντε κλικ στο εικονίδιο για να απολαύσετε τη μουσική"
             posts={posts.slice(0, 6)}
           />
         </div>
 
         <SectionMagazine4
-          heading="Most viewed articles"
-          subHeading="Explore the most viewed articles"
+          heading="Περισσότερο προβεβλημένα άρθρα"
+          subHeading="Εξερευνήστε τα περισσότερο προβεβλημένα άρθρα"
           posts={mostViewedPosts}
           categories={categories}
         />
 
         <SectionBecomeAnAuthor
-          subHeading="supper change your planning powers"
-          excerpt="Become an author you can earn extra income by writing articles. Read and share new perspectives on just about any topic. Everyone’s welcome."
-          buttonText="Become an author"
-          heading="Become an author and share your great stories"
+          subHeading="αλλάξτε τις δυνάμεις σχεδιασμού σας"
+          excerpt="Γίνετε συγγραφέας μπορείτε να κερδίσετε επιπλέον εισόδημα γράφοντας άρθρα. Διαβάστε και μοιραστείτε νέες προοπτικές για σχεδόν κάθε θέμα. Όλοι είναι ευπρόσδεκτοι."
+          buttonText="Γίνετε συγγραφέας"
+          heading="Γίνετε συγγραφέας και μοιραστείτε τις μεγάλες σας ιστορίες"
         />
 
         <div className="container space-y-28 lg:space-y-32">
           <SectionMagazine8
             posts={audioPosts.slice(0, 6)}
             heading="Stream live audio"
-            dimHeading="Click on the icon to enjoy the music"
+            dimHeading="Κάντε κλικ στο εικονίδιο για να απολαύσετε τη μουσική"
           />
 
           <div className="relative py-16 lg:py-20">
@@ -81,7 +81,7 @@ const Page = async () => {
             <SectionMagazine9
               posts={audioPosts.slice(0, 9)}
               heading="Stream live audio"
-              dimHeading="Click on the icon to enjoy the music"
+              dimHeading="Κάντε κλικ στο εικονίδιο για να απολαύσετε τη μουσική"
             />
           </div>
         </div>

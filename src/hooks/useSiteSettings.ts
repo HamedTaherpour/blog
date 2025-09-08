@@ -7,10 +7,25 @@ interface SiteSettings {
   siteName: string
   siteDesc: string | null
   logoUrl: string | null
+  siteAuthor: string | null
+  metaTitle: string | null
+  metaDescription: string | null
+  metaKeywords: string | null
+  focusKeyword: string | null
+  canonicalUrl: string | null
+  allowIndexing: boolean
+  ogTitle: string | null
+  ogDescription: string | null
+  ogType: string | null
+  ogImage: string | null
+  twitterTitle: string | null
+  twitterDescription: string | null
+  twitterCardType: string | null
+  twitterImage: string | null
   twitter: string | null
   facebook: string | null
-  youtube: string | null
   instagram: string | null
+  youtube: string | null
   updatedAt: string
 }
 

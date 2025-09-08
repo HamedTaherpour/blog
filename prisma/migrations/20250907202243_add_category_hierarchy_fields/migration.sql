@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "public"."Category" ADD COLUMN     "level" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "order" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "path" TEXT NOT NULL DEFAULT '';

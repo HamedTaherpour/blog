@@ -3,6 +3,10 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
+generator nextAdmin {
+  provider = "next-admin-generator-prisma"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -17,7 +21,7 @@ model User {
   passwordHash  String?
   image         String?
   bio           String?
-  role          UserRole       @default(USER)
+  role          UserRole       @default(AUTHOR)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   accounts      Account[]
@@ -67,6 +71,9 @@ model Category {
   description         String?
   image               String?
   color               String?    @default("blue")
+  order               Int        @default(0)
+  level               Int        @default(0)
+  path                String     @default("")
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
   metaTitle           String?
@@ -184,9 +191,10 @@ model SiteSetting {
   siteName  String
   siteDesc  String?
   logoUrl   String?
-  twitter   String?
-  facebook  String?
-  instagram String?
+  // Contact fields
+  contactAddress String?
+  contactEmail   String?
+  contactPhone   String?
   
   // Meta Tags Fields
   siteAuthor        String?
@@ -208,10 +216,7 @@ model SiteSetting {
   twitterDescription String?
   twitterCardType   String?  @default("summary")
   twitterImage      String?
-  
-  // Additional Social Media
-  youtube           String?
-  
+    
   updatedAt DateTime @updatedAt
 }
 
@@ -243,8 +248,12 @@ model HeaderMenuItem {
   label       String
   href        String
   order       Int           @default(0)
+  level       Int           @default(0)
+  path        String        @default("")
   isActive    Boolean       @default(true)
   isExternal  Boolean       @default(false)
+  linkType    String        @default("custom") // custom, category, tag, page
+  linkId      String?       // ID of the linked entity (category, tag, etc.)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   parentId    String?
@@ -252,8 +261,19 @@ model HeaderMenuItem {
   children    HeaderMenuItem[] @relation("HeaderMenuHierarchy")
 }
 
+model SocialMediaLink {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  iconName    String   // Icon identifier (e.g., 'facebook', 'twitter', 'instagram')
+  iconType    String   @default("hugeicons") // Type of icon library used
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 enum UserRole {
-  USER
   AUTHOR
   EDITOR
   ADMIN

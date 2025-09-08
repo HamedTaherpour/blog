@@ -4,21 +4,35 @@ import { writeFile } from 'fs/promises'
 import { join } from 'path'
 import { existsSync, mkdirSync } from 'fs'
 import { processCategorySEOFields } from '@/lib/category-seo-utils'
+import { authOptions } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
+import { canAccess } from '@/lib/api-middleware'
+import { UserRole } from '@/lib/permissions'
+import { 
+  getCategoriesHierarchy, 
+  getCategoriesFlat, 
+  createCategory, 
+  updateCategory, 
+  deleteCategory, 
+  reorderCategories,
+  getCategoryBreadcrumb,
+  CreateCategoryData,
+  UpdateCategoryData,
+  ReorderCategoriesData
+} from '@/lib/category-service'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const categories = await prisma.category.findMany({
-      include: {
-        _count: {
-          select: {
-            posts: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+    const { searchParams } = new URL(request.url)
+    const format = searchParams.get('format') || 'hierarchy'
+    
+    let categories
+    
+    if (format === 'flat') {
+      categories = await getCategoriesFlat()
+    } else {
+      categories = await getCategoriesHierarchy()
+    }
 
     return NextResponse.json(categories)
   } catch (error) {
@@ -32,6 +46,20 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication and permissions
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 })
+    }
+
+    const hasPermission = canAccess(session.user.role as UserRole, 'categories', 'create')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to create categories',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
+
     const formData = await request.formData()
     
     // Basic category data
@@ -156,35 +184,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const category = await prisma.category.create({
-      data: {
-        name,
-        slug,
-        description: description || null,
-        image: categoryImage,
-        color: color || 'blue',
-        // SEO fields (processed with auto-population)
-        metaTitle: seoFields.metaTitle,
-        metaDescription: seoFields.metaDescription,
-        metaKeywords: seoFields.metaKeywords,
-        canonicalUrl: seoFields.canonicalUrl,
-        // Open Graph fields
-        ogTitle: seoFields.ogTitle,
-        ogDescription: seoFields.ogDescription,
-        ogType: seoFields.ogType,
-        ogImage: seoFields.ogImage,
-        // Twitter Card fields
-        twitterCard: seoFields.twitterCard,
-        twitterTitle: seoFields.twitterTitle,
-        twitterDescription: seoFields.twitterDescription,
-        twitterImage: seoFields.twitterImage,
-        // Icon and Media fields
-        ogImageMediaId: ogImageMediaId || null,
-        twitterImageMediaId: twitterImageMediaId || null,
-        // Parent category
-        parentId: parentId || null
-      }
-    })
+    const categoryData: CreateCategoryData = {
+      name,
+      slug,
+      description: description || undefined,
+      image: categoryImage || undefined,
+      color: color || undefined,
+      parentId: parentId || undefined,
+      // SEO fields (processed with auto-population)
+      metaTitle: seoFields.metaTitle || undefined,
+      metaDescription: seoFields.metaDescription || undefined,
+      metaKeywords: seoFields.metaKeywords || undefined,
+      canonicalUrl: seoFields.canonicalUrl || undefined,
+      // Open Graph fields
+      ogTitle: seoFields.ogTitle || undefined,
+      ogDescription: seoFields.ogDescription || undefined,
+      ogType: seoFields.ogType || undefined,
+      ogImage: seoFields.ogImage || undefined,
+      // Twitter Card fields
+      twitterCard: seoFields.twitterCard || undefined,
+      twitterTitle: seoFields.twitterTitle || undefined,
+      twitterDescription: seoFields.twitterDescription || undefined,
+      twitterImage: seoFields.twitterImage || undefined,
+      // Icon and Media fields
+      ogImageMediaId: ogImageMediaId || undefined,
+      twitterImageMediaId: twitterImageMediaId || undefined,
+    }
+
+    const category = await createCategory(categoryData)
 
     return NextResponse.json(category, { status: 201 })
   } catch (error) {

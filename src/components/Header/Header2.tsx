@@ -1,9 +1,10 @@
 'use client'
 
-import { TNavigationItem } from '@/data/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { HeaderMenuItem } from '@/lib/header-service'
+import { SiteSettings } from '@/lib/settings-service'
 import { Button } from '@/shared/Button'
+import Logo from '@/shared/Logo'
 import { PlusIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
 import { FC } from 'react'
@@ -11,29 +12,35 @@ import AvatarDropdown from './AvatarDropdown'
 import HamburgerBtnMenu from './HamburgerBtnMenu'
 import Navigation from './Navigation/Navigation'
 import SearchModal from './SearchModal'
-import Logo from '@/shared/Logo'
+
+interface TNavigationItem {
+  id: string
+  name: string
+  href: string
+  type?: 'dropdown' | 'mega-menu'
+  children?: TNavigationItem[]
+}
 
 interface Props {
   bottomBorder?: boolean
   className?: string
   headerMenus: HeaderMenuItem[]
+  siteSettings?: SiteSettings
 }
 
-const Header2: FC<Props> = ({ bottomBorder, className, headerMenus }) => {
-  const { isAuthenticated, isLoading, user, handleLogin, handleSignup } = useAuth()
+const Header2: FC<Props> = ({ bottomBorder, className, headerMenus, siteSettings }) => {
+  const { isAuthenticated, isLoading, user } = useAuth()
 
-  // Transform header menus to TNavigationItem format
-  const transformedMenus: TNavigationItem[] = headerMenus.map((menu) => ({
+  // Transform header menus to TNavigationItem format recursively
+  const transformMenu = (menu: HeaderMenuItem): TNavigationItem => ({
     id: menu.id,
     name: menu.label,
     href: menu.href,
     type: menu.children && menu.children.length > 0 ? 'dropdown' : undefined,
-    children: menu.children?.map((child) => ({
-      id: child.id,
-      name: child.label,
-      href: child.href,
-    })),
-  }))
+    children: menu.children?.map(transformMenu),
+  })
+
+  const transformedMenus: TNavigationItem[] = headerMenus.map(transformMenu)
 
   return (
     <div
@@ -46,8 +53,8 @@ const Header2: FC<Props> = ({ bottomBorder, className, headerMenus }) => {
     >
       <div className="container flex h-20 justify-between">
         <div className="flex flex-1 items-center gap-x-4 sm:gap-x-5 lg:gap-x-7">
-          <Logo />  
-          <div className="h-8 border-l"></div>
+          <Logo logoUrl={siteSettings?.logoUrl || ''} />
+          <div className="h-8 border-l" />
           <div className="-ms-1.5">
             <SearchModal type="type1" />
           </div>
@@ -58,28 +65,15 @@ const Header2: FC<Props> = ({ bottomBorder, className, headerMenus }) => {
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-x-0.5">
-          {!isLoading && (
+          {!isLoading && isAuthenticated && (
             <>
-              {isAuthenticated ? (
-                <>
-                  <div className="hidden sm:block">
-                    <Button className="h-10 px-3!" href={'/dashboard/posts/new'} plain>
-                      <PlusIcon className="size-5!" />
-                      Create
-                    </Button>
-                  </div>
-                  <AvatarDropdown />
-                </>
-              ) : (
-                <>
-                  <Button onClick={handleLogin} className="me-2 h-10 px-4" plain>
-                    Sign in
-                  </Button>
-                  <Button onClick={handleSignup} className="h-10 px-4">
-                    Sign up
-                  </Button>
-                </>
-              )}
+              <div className="hidden sm:block">
+                <Button className="h-10 px-3!" href={'/dashboard/posts/new'} plain>
+                  <PlusIcon className="size-5!" />
+                  Δημιουργία
+                </Button>
+              </div>
+              <AvatarDropdown />
             </>
           )}
           <div className="ms-2 flex lg:hidden">

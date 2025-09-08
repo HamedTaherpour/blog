@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { authOptions } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
+import { canAccess } from '@/lib/api-middleware'
+import { UserRole } from '@/lib/permissions'
 
 export async function GET() {
   try {
@@ -28,6 +32,20 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication and permissions
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 })
+    }
+
+    const hasPermission = canAccess(session.user.role as UserRole, 'tags', 'create')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to create tags',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
+
     const body = await request.json()
     const { name, slug } = body
 

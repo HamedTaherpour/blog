@@ -1,6 +1,5 @@
 import { ApplicationLayout } from '@/app/(app)/application-layout'
 import SectionSubscribe2 from '@/components/SectionSubscribe2'
-import { getAuthors } from '@/data/authors'
 import { ReactNode } from 'react'
 
 interface Props {
@@ -8,8 +7,6 @@ interface Props {
 }
 
 const Layout: React.FC<Props> = async ({ children }) => {
-  const authors = await getAuthors()
-
   return (
     <ApplicationLayout>
       {children}

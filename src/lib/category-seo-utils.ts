@@ -111,7 +111,10 @@ function generateCategoryMetaDescription(name: string, description?: string | nu
 /**
  * Generates canonical URL for categories
  */
-function generateCategoryCanonicalUrl(slug: string, baseUrl: string = process.env.NEXTAUTH_URL || 'https://example.com'): string {
+function generateCategoryCanonicalUrl(
+  slug: string,
+  baseUrl: string = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com'
+): string {
   return `${baseUrl}/category/${slug}`
 }
 

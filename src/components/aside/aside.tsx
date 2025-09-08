@@ -72,7 +72,7 @@ export function Aside({
                             <span className="text-2xl font-medium">{heading}</span>
                           </DialogTitle>
                         )}
-                        {logoOnHeading && <Logo size="size-10" />}
+                        {logoOnHeading && <Logo />}
                       </>
                     )}
 

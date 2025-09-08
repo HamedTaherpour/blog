@@ -226,15 +226,34 @@ export default function EditPostPage() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to update post')
+        const errorData = await response.json()
+        
+        // Handle validation errors
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          errorData.errors.forEach((error: any) => {
+            toast.error(error.message || 'Validation error')
+          })
+        } else if (errorData.error) {
+          toast.error(errorData.error)
+        } else if (errorData.message) {
+          toast.error(errorData.message)
+        } else {
+          toast.error('Failed to update post')
+        }
+        return
       }
 
+      const result = await response.json()
       toast.success('Post updated successfully!')
       router.push('/dashboard/posts')
     } catch (error) {
       console.error('Error updating post:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to update post')
+      
+      if (error instanceof Error) {
+        toast.error(error.message)
+      } else {
+        toast.error('An unexpected error occurred')
+      }
     } finally {
       setLoading(false)
     }
@@ -523,7 +542,7 @@ export default function EditPostPage() {
                   <Input
                     value={canonicalUrl}
                     onChange={(e) => setCanonicalUrl(e.target.value)}
-                    placeholder="https://example.com/post-url"
+                    placeholder="/post-url"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -588,7 +607,7 @@ export default function EditPostPage() {
                   <Input
                     value={ogImage}
                     onChange={(e) => setOgImage(e.target.value)}
-                    placeholder="https://example.com/image.jpg"
+                    placeholder="/image.jpg"
                   />
                 </div>
                 <div>
@@ -635,7 +654,7 @@ export default function EditPostPage() {
                   <Input
                     value={twitterImage}
                     onChange={(e) => setTwitterImage(e.target.value)}
-                    placeholder="https://example.com/twitter-image.jpg"
+                    placeholder="/twitter-image.jpg"
                   />
                 </div>
               </CardContent>

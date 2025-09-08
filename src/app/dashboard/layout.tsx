@@ -1,9 +1,8 @@
 'use client'
 
-import NotifyDropdown from '@/components/Header/NotifyDropdown'
 import { useAuth } from '@/hooks/useAuth'
+import { getNavigationItems } from '@/lib/permissions'
 import Avatar from '@/shared/Avatar'
-import Logo from '@/shared/Logo'
 import { Divider } from '@/shared/divider'
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from '@/shared/dropdown'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
@@ -13,33 +12,23 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 
-const navigation = [
-  { name: 'Posts', href: '/dashboard/posts' },
-  { name: 'Categories', href: '/dashboard/categories' },
-  { name: 'Tags', href: '/dashboard/tags' },
-  { name: 'Site Settings', href: '/dashboard/settings' },
-  { name: 'Profile', href: '/dashboard/edit-profile' },
-]
-const userNavigation = [
-  { name: 'Sign out', href: '#' },
-]
+const userNavigation = [{ name: 'Sign out', href: '#' }]
 
 export default function Layout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const { handleLogout, user } = useAuth()
   const isActive = (href: string) => pathname === href
+  
+  // Get navigation items based on user permissions
+  const navigation = getNavigationItems(user?.role as any)
   const pageTitle = navigation.find((item) => isActive(item.href))?.name ?? 'Dashboard'
-
-    return (
+  return (
     <>
       <div className="min-h-screen">
         <Disclosure as="nav">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-20 justify-between">
               <div className="flex">
-                <div className="flex shrink-0 items-center">
-                  <Logo size="size-10" />
-                </div>
                 <div className="hidden sm:-my-px sm:ms-6 sm:flex sm:gap-x-8">
                   {navigation.map((item) => (
                     <Link
@@ -59,7 +48,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 </div>
               </div>
               <div className="hidden gap-x-4 sm:ms-6 sm:flex sm:items-center">
-
+                
                 {/* Profile dropdown */}
                 <Dropdown>
                   <DropdownButton as={'button'} className="rounded-full">
@@ -160,9 +149,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 
         <div className="py-12">
           {/* <header> */}
-            {/* <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"> */}
-              {/* <h1 className="text-3xl font-bold tracking-tight">{pageTitle}</h1> */}
-            {/* </div> */}
+          {/* <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"> */}
+          {/* <h1 className="text-3xl font-bold tracking-tight">{pageTitle}</h1> */}
+          {/* </div> */}
           {/* </header> */}
           <main>
             <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">{children}</div>

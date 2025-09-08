@@ -1,6 +1,9 @@
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { processSEOFields } from '@/lib/seo-utils'
+import { canAccess } from '@/lib/api-middleware'
+import { UserRole } from '@/lib/permissions'
+import { triggerSitemapRegeneration } from '@/lib/sitemap-utils'
 import { existsSync, mkdirSync } from 'fs'
 import { writeFile } from 'fs/promises'
 import { getServerSession } from 'next-auth'
@@ -9,6 +12,20 @@ import { join } from 'path'
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if user has permission to read posts
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 })
+    }
+
+    const hasPermission = canAccess(session.user.role as UserRole, 'posts', 'read')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to read posts',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const categoryId = searchParams.get('categoryId')
@@ -28,6 +45,11 @@ export async function GET(request: NextRequest) {
 
     if (postType) {
       where.postType = postType
+    }
+
+    // For AUTHOR role, only show their own posts
+    if (session.user.role === 'AUTHOR') {
+      where.authorId = session.user.id
     }
 
     const posts = await prisma.post.findMany({
@@ -91,6 +113,15 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if user has permission to create posts
+    const hasPermission = canAccess(session.user.role as UserRole, 'posts', 'create')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to create posts',
+        userRole: session.user.role 
+      }, { status: 403 })
     }
 
     // Verify user exists in database
@@ -355,6 +386,11 @@ export async function POST(request: NextRequest) {
         media: true,
       },
     })
+
+    // Trigger sitemap regeneration for published posts
+    if (post.status === 'PUBLISHED') {
+      await triggerSitemapRegeneration()
+    }
 
     return NextResponse.json(post, { status: 201 })
   } catch (error) {

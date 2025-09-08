@@ -14,6 +14,7 @@ interface SiteSettings {
   id: number
   siteName: string
   siteDesc?: string | null
+  logoUrl?: string | null
   siteAuthor?: string | null
   metaTitle?: string | null
   metaDescription?: string | null
@@ -29,6 +30,10 @@ interface SiteSettings {
   twitterDescription?: string | null
   twitterCardType: string
   twitterImage?: string | null
+  // Contact fields (optional in older schemas)
+  contactAddress?: string | null
+  contactEmail?: string | null
+  contactPhone?: string | null
 }
 
 export default function MetaTagsTab() {
@@ -40,6 +45,7 @@ export default function MetaTagsTab() {
   const [formData, setFormData] = useState({
     siteName: '',
     siteDesc: '',
+    logoUrl: '',
     siteAuthor: '',
     metaTitle: '',
     metaDescription: '',
@@ -55,6 +61,10 @@ export default function MetaTagsTab() {
     twitterDescription: '',
     twitterCardType: 'summary',
     twitterImage: '',
+    // Contact fields
+    contactAddress: '',
+    contactEmail: '',
+    contactPhone: '',
   })
 
   // Fetch settings on component mount
@@ -78,6 +88,7 @@ export default function MetaTagsTab() {
       setFormData({
         siteName: data.siteName || '',
         siteDesc: data.siteDesc || '',
+        logoUrl: data.logoUrl || '',
         siteAuthor: data.siteAuthor || '',
         metaTitle: data.metaTitle || '',
         metaDescription: data.metaDescription || '',
@@ -93,6 +104,9 @@ export default function MetaTagsTab() {
         twitterDescription: data.twitterDescription || '',
         twitterCardType: data.twitterCardType || 'summary',
         twitterImage: data.twitterImage || '',
+        contactAddress: data.contactAddress || '',
+        contactEmail: data.contactEmail || '',
+        contactPhone: data.contactPhone || '',
       })
     } catch (error) {
       console.error('Error fetching settings:', error)
@@ -128,7 +142,7 @@ export default function MetaTagsTab() {
 
       const updatedSettings = await response.json()
       setSettings(updatedSettings)
-      toast.success('Meta tags saved successfully!')
+      toast.success('Settings saved successfully!')
     } catch (error) {
       console.error('Error saving settings:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to save settings')
@@ -187,6 +201,31 @@ export default function MetaTagsTab() {
             </div>
           </div>
           <div className="space-y-2">
+            <label htmlFor="site-logo" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Site Logo URL
+            </label>
+            <Input
+              id="site-logo"
+              placeholder="/logo.png"
+              type="url"
+              value={formData.logoUrl}
+              onChange={(e) => handleInputChange('logoUrl', e.target.value)}
+            />
+            {formData.logoUrl && (
+              <div className="mt-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Logo Preview:</p>
+                <img
+                  src={formData.logoUrl}
+                  alt="Site Logo"
+                  className="h-16 w-auto object-contain border border-gray-200 dark:border-gray-700 rounded"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
             <label htmlFor="site-author" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Site Author
             </label>
@@ -196,6 +235,43 @@ export default function MetaTagsTab() {
               value={formData.siteAuthor}
               onChange={(e) => handleInputChange('siteAuthor', e.target.value)}
             />
+          </div>
+          {/* Contact Information */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="contact-address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Contact Address
+              </label>
+              <Input
+                id="contact-address"
+                placeholder="Address"
+                value={formData.contactAddress}
+                onChange={(e) => handleInputChange('contactAddress', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Contact Email
+              </label>
+              <Input
+                id="contact-email"
+                placeholder="email@example.com"
+                type="email"
+                value={formData.contactEmail}
+                onChange={(e) => handleInputChange('contactEmail', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="contact-phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Contact Phone
+              </label>
+              <Input
+                id="contact-phone"
+                placeholder="000-000-0000"
+                value={formData.contactPhone}
+                onChange={(e) => handleInputChange('contactPhone', e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
@@ -267,7 +343,7 @@ export default function MetaTagsTab() {
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="og-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="og-description" className="block text sm font-medium text-gray-700 dark:text-gray-300">
                 OG Description
               </label>
               <Textarea
@@ -299,7 +375,7 @@ export default function MetaTagsTab() {
               </label>
               <Input
                 id="og-image"
-                placeholder="https://example.com/og-image.jpg"
+                placeholder="/og-image.jpg"
                 type="url"
                 value={formData.ogImage}
                 onChange={(e) => handleInputChange('ogImage', e.target.value)}
@@ -357,7 +433,7 @@ export default function MetaTagsTab() {
               </label>
               <Input
                 id="twitter-image"
-                placeholder="https://example.com/twitter-image.jpg"
+                placeholder="/twitter-image.jpg"
                 type="url"
                 value={formData.twitterImage}
                 onChange={(e) => handleInputChange('twitterImage', e.target.value)}

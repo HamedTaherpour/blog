@@ -1,39 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@/generated/prisma'
+import { prisma } from '@/lib/prisma'
+import { authOptions } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
+import { canAccess } from '@/lib/api-middleware'
+import { UserRole } from '@/lib/permissions'
+import { 
+  getHeaderMenusHierarchy, 
+  getHeaderMenusFlat, 
+  getActiveHeaderMenus,
+  createHeaderMenuItem, 
+  updateHeaderMenuItem, 
+  deleteHeaderMenuItem, 
+  reorderHeaderMenus,
+  getLinkOptions,
+  CreateHeaderMenuItemData,
+  UpdateHeaderMenuItemData,
+  ReorderHeaderMenuData
+} from '@/lib/header-menu-service'
 
-const prisma = new PrismaClient()
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const headerMenus = await prisma.headerMenuItem.findMany({
-      where: {
-        isActive: true,
-      },
-      orderBy: [
-        { order: 'asc' },
-        { createdAt: 'asc' },
-      ],
-      include: {
-        children: {
-          where: {
-            isActive: true,
-          },
-          orderBy: [
-            { order: 'asc' },
-            { createdAt: 'asc' },
-          ],
-        },
-      },
-    })
+    const { searchParams } = new URL(request.url)
+    const format = searchParams.get('format') || 'hierarchy'
+    const active = searchParams.get('active') === 'true'
+    
+    let menuItems
+    
+    if (active) {
+      menuItems = await getActiveHeaderMenus()
+    } else if (format === 'flat') {
+      menuItems = await getHeaderMenusFlat()
+    } else {
+      menuItems = await getHeaderMenusHierarchy()
+    }
 
-    // Filter to only show parent items (items without parentId)
-    const parentMenus = headerMenus.filter(menu => !menu.parentId)
-
-    return NextResponse.json(parentMenus)
+    return NextResponse.json(menuItems)
   } catch (error) {
     console.error('Error fetching header menus:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch header menus' },
+      { message: 'Failed to fetch header menus' },
       { status: 500 }
     )
   }
@@ -41,8 +46,22 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication and permissions
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ message: 'Authentication required' }, { status: 401 })
+    }
+
+    const hasPermission = canAccess(session.user.role as UserRole, 'settings', 'update')
+    if (!hasPermission) {
+      return NextResponse.json({ 
+        message: 'Insufficient permissions to update header menus',
+        userRole: session.user.role 
+      }, { status: 403 })
+    }
+
     const body = await request.json()
-    const { menus } = body
+    const { menus }: { menus: any[] } = body
 
     if (!menus || !Array.isArray(menus)) {
       return NextResponse.json(
@@ -68,8 +87,12 @@ export async function POST(request: NextRequest) {
             label: menu.label,
             href: menu.href,
             order: i,
+            level: 0,
+            path: '',
             isActive: menu.isActive !== false,
             isExternal: menu.isExternal || false,
+            linkType: menu.linkType || 'custom',
+            linkId: menu.linkId || null,
           },
         })
 
@@ -84,8 +107,12 @@ export async function POST(request: NextRequest) {
                 label: child.label,
                 href: child.href,
                 order: j,
+                level: 1,
+                path: parentMenu.id,
                 isActive: child.isActive !== false,
                 isExternal: child.isExternal || false,
+                linkType: child.linkType || 'custom',
+                linkId: child.linkId || null,
                 parentId: parentMenu.id,
               },
             })

@@ -22,7 +22,7 @@ const SingleMeta: FC<Props> = ({ className, date, author, readingTime }) => {
             <LocalDate date={date} options={{ year: 'numeric', month: 'long', day: 'numeric' }} />
           </span>
           <span>•</span>
-          <span>{readingTime} min read</span>
+          <span>{readingTime} λεπτά ανάγνωσης</span>
         </div>
       </div>
 

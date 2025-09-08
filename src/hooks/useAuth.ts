@@ -29,14 +29,6 @@ export const useAuth = () => {
     }
   }
 
-  const handleLogin = () => {
-    window.location.href = '/login'
-  }
-
-  const handleSignup = () => {
-    window.location.href = '/signup'
-  }
-
   return {
     // User data
     user,
@@ -49,7 +41,5 @@ export const useAuth = () => {
 
     // Actions
     handleLogout,
-    handleLogin,
-    handleSignup,
   }
 }

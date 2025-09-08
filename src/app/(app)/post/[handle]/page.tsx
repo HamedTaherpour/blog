@@ -2,6 +2,7 @@ import WidgetCategories from '@/components/WidgetCategories'
 import WidgetPosts from '@/components/WidgetPosts'
 import WidgetTags from '@/components/WidgetTags'
 import { fetchCategories, fetchPostByHandle, fetchPosts, fetchRelatedPosts, fetchTags } from '@/lib/api'
+import { generatePostMetadata } from '@/lib/metadata'
 import { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
@@ -14,72 +15,47 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
   const post = await fetchPostByHandle(handle)
 
   const headersList = await headers()
-  const protocol = headersList.get('x-forwarded-proto') || 'http' // Default to http if not present
+  const protocol = headersList.get('x-forwarded-proto') || 'http'
   const host = headersList.get('x-forwarded-host')
-
   const origin = `${protocol}://${host}`
 
   if (!post) {
     return {
-      title: 'Post not found',
-      description: 'The requested post could not be found.',
+      title: 'Άρθρο δεν βρέθηκε',
+      description: 'Το ζητούμενο άρθρο δεν μπόρεσε να βρεθεί.',
     }
   }
 
-  // Use SEO fields if available, otherwise fallback to basic fields
-  const title = post.seo?.metaTitle || post.title
-  const description = post.seo?.metaDescription || post.excerpt || 'Read this post on our blog'
-  const keywords = post.seo?.metaKeywords || undefined
-  const canonicalUrl = origin + post.seo?.canonicalUrl || undefined
+  // Use post-specific SEO fields or fallback to basic fields
+  const title = post.metaTitle || post.title
+  const description = post.metaDescription || post.excerpt || 'Διαβάστε αυτό το άρθρο στο blog μας'
+  const keywords = post.metaKeywords ? post.metaKeywords.split(',').map((k: string) => k.trim()) : undefined
+  const canonicalUrl = post.canonicalUrl ? `${origin}${post.canonicalUrl}` : undefined
+  const ogImage = post.ogImage ? `${origin}${post.ogImage}` : (post.coverImage ? `${origin}${post.coverImage}` : undefined)
+  const twitterImage = post.twitterImage ? `${origin}${post.twitterImage}` : (post.coverImage ? `${origin}${post.coverImage}` : undefined)
 
-  // Open Graph data
-  const ogTitle = post.seo?.ogTitle || post.title
-  const ogDescription = post.seo?.ogDescription || post.excerpt || description
-  const ogType = post.seo?.ogType || 'article'
-  const ogImage = origin + (post.seo?.ogImage || (post.featuredImage ? post.featuredImage.src : undefined))
-
-  // Twitter Card data
-  const twitterTitle = post.seo?.twitterTitle || post.title
-  const twitterDescription = post.seo?.twitterDescription || post.excerpt || description
-  const twitterCard = post.seo?.twitterCardType || 'summary_large_image'
-  const twitterImage = origin + (post.seo?.twitterImage || (post.featuredImage ? post.featuredImage.src : undefined))
-
-  const metadata: Metadata = {
+  return await generatePostMetadata({
     title,
     description,
-    keywords: keywords ? keywords.split(',').map((k: string) => k.trim()) : undefined,
-    authors: [{ name: post.author.name }],
-    robots: post.seo?.allowIndexing !== false ? 'index,follow' : 'noindex,nofollow',
-    alternates: canonicalUrl ? { canonical: canonicalUrl } : undefined,
-    openGraph: {
-      title: ogTitle,
-      description: ogDescription,
-      type: ogType as any,
-      images: ogImage
-        ? [
-            {
-              url: ogImage,
-              width: 1200,
-              height: 630,
-              alt: ogTitle,
-            },
-          ]
-        : undefined,
-      siteName: 'NCMAZ Blog',
-      publishedTime: post.date,
-      authors: [post.author.name],
-      tags: post.tags?.map((tag: any) => tag.name) || undefined,
-    },
-    twitter: {
-      card: twitterCard as any,
-      title: twitterTitle,
-      description: twitterDescription,
-      images: twitterImage ? [twitterImage] : undefined,
-      creator: `@${post.author.handle}`,
-    },
-  }
-
-  return metadata
+    keywords,
+    image: ogImage,
+    url: canonicalUrl,
+    type: 'article',
+    author: post.author.name,
+    publishedTime: post.publishedAt || post.createdAt,
+    modifiedTime: post.updatedAt,
+    tags: post.tags?.map((tag: any) => tag.name),
+    allowIndexing: post.allowIndexing,
+    ogTitle: post.ogTitle,
+    ogDescription: post.ogDescription,
+    ogType: post.ogType,
+    ogImage: ogImage,
+    twitterTitle: post.twitterTitle,
+    twitterDescription: post.twitterDescription,
+    twitterCardType: post.twitterCardType,
+    twitterImage: twitterImage,
+    focusKeyword: post.focusKeyword,
+  })
 }
 
 const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {

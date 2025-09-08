@@ -14,29 +14,34 @@ export interface HeaderMenuItem {
 
 export async function getHeaderMenus(): Promise<HeaderMenuItem[]> {
   try {
-    const headerMenus = await prisma.headerMenuItem.findMany({
+    // Get all active menu items
+    const allMenus = await prisma.headerMenuItem.findMany({
       where: {
         isActive: true,
-        parentId: null, // Only get parent items
       },
       orderBy: [
+        { level: 'asc' },
         { order: 'asc' },
         { createdAt: 'asc' },
       ],
-      include: {
-        children: {
-          where: {
-            isActive: true,
-          },
-          orderBy: [
-            { order: 'asc' },
-            { createdAt: 'asc' },
-          ],
-        },
-      },
     })
 
-    return headerMenus
+    // Build hierarchy recursively
+    const buildHierarchy = (parentId: string | null = null): HeaderMenuItem[] => {
+      return allMenus
+        .filter(menu => menu.parentId === parentId)
+        .map(menu => ({
+          id: menu.id,
+          label: menu.label,
+          href: menu.href,
+          order: menu.order,
+          isActive: menu.isActive,
+          isExternal: menu.isExternal,
+          children: buildHierarchy(menu.id),
+        }))
+    }
+
+    return buildHierarchy()
   } catch (error) {
     console.error('Error fetching header menus:', error)
     return []

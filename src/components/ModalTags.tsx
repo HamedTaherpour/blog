@@ -24,11 +24,11 @@ const ModalTags: FC<Props> = ({ tags }) => {
       <>
         <Button type="button" color="white" onClick={() => setIsOpen(true)}>
           <HugeiconsIcon icon={Tag02Icon} size={24} />
-          <span>Tags</span>
+          <span>Ετικέτες</span>
           <ChevronDownIcon className="size-4" />
         </Button>
         <Dialog size="3xl" open={isOpen} onClose={setIsOpen}>
-          <DialogTitle>Discover other tags</DialogTitle>
+          <DialogTitle>Ανακαλύψτε άλλες ετικέτες</DialogTitle>
           <Divider className="my-6" />
           <DialogBody>
             <div className="flex flex-wrap dark:text-neutral-200">
@@ -41,9 +41,9 @@ const ModalTags: FC<Props> = ({ tags }) => {
           </DialogBody>
           <DialogActions>
             <Button plain onClick={() => setIsOpen(false)}>
-              Cancel
+              Ακύρωση
             </Button>
-            <Button onClick={() => setIsOpen(false)}>Close</Button>
+            <Button onClick={() => setIsOpen(false)}>Κλείσιμο</Button>
           </DialogActions>
         </Dialog>
       </>

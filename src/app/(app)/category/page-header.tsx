@@ -43,7 +43,7 @@ const PageHeader = ({
           <div className="flex-1 lg:ps-4">
             <div className="max-w-(--breakpoint-sm) space-y-3.5">
               <div>
-                <Badge color={color as any}>Category</Badge>
+                <Badge color={color as any}>Κατηγορία</Badge>
                 <h2 className="mt-2 text-2xl font-semibold lg:text-3xl">{name}</h2>
               </div>
               <p className="text-sm text-neutral-600 dark:text-neutral-300">{description}</p>
@@ -55,8 +55,8 @@ const PageHeader = ({
                   {count}
                   {` `}
                   {type === 'audio' && 'podcasts'}
-                  {type === 'video' && 'videos'}
-                  {type === 'default' && 'articles'}
+                  {type === 'video' && 'βίντεο'}
+                  {type === 'default' && 'άρθρα'}
                 </span>
               </p>
             </div>
@@ -78,7 +78,7 @@ function ActionDropdown({ handle, category }: { handle: string; category: TCateg
 
   const actions = [
     {
-      name: 'Copy link',
+      name: 'Αντιγραφή συνδέσμου',
       icon: CopyLinkIcon,
       onClick: () => {
         navigator.clipboard.writeText(window.location.href)
@@ -104,37 +104,37 @@ function ActionDropdown({ handle, category }: { handle: string; category: TCateg
       {/* DIALOG HIDE AUTHOR */}
       <Dialog open={isOpenDialogHideAuthor} onClose={() => setIsOpenDialogHideAuthor(false)}>
         <DialogTitle>
-          Hide this category? <span className="font-semibold">({category.name.trim()})</span>
+          Απόκρυψη αυτής της κατηγορίας? <span className="font-semibold">({category.name.trim()})</span>
         </DialogTitle>
         <DialogBody>
           <p>
-            Are you sure you want to hide the <span className="font-semibold">{category.name.trim()}</span>? This action
-            will hide all posts from this category.
+            Είστε σίγουροι ότι θέλετε να αποκρύψετε την <span className="font-semibold">{category.name.trim()}</span>? Αυτή η ενέργεια
+            θα αποκρύψει όλα τα άρθρα από αυτή την κατηγορία.
           </p>
         </DialogBody>
         <DialogActions>
           <Button plain onClick={() => setIsOpenDialogHideAuthor(false)}>
-            Cancel
+            Ακύρωση
           </Button>
-          <Button onClick={() => setIsOpenDialogHideAuthor(false)}>Hide</Button>
+          <Button onClick={() => setIsOpenDialogHideAuthor(false)}>Απόκρυψη</Button>
         </DialogActions>
       </Dialog>
 
       {/* DIALOG REPORT POST */}
       <Dialog open={isOpenDialogReportPost} onClose={() => setIsOpenDialogReportPost(false)}>
-        <DialogTitle>Report this category?</DialogTitle>
+        <DialogTitle>Αναφορά αυτής της κατηγορίας?</DialogTitle>
         <DialogBody>
           <p>
-            Are you sure you want to report the{' '}
-            <span className="font-semibold">&quot;{category.name.trim()}&quot;</span>? This action will report this
-            category.
+            Είστε σίγουροι ότι θέλετε να αναφέρετε την{' '}
+            <span className="font-semibold">&quot;{category.name.trim()}&quot;</span>? Αυτή η ενέργεια θα αναφέρει αυτή την
+            κατηγορία.
           </p>
         </DialogBody>
         <DialogActions>
           <Button plain onClick={() => setIsOpenDialogReportPost(false)}>
-            Cancel
+            Ακύρωση
           </Button>
-          <Button onClick={() => setIsOpenDialogReportPost(false)}>Report</Button>
+          <Button onClick={() => setIsOpenDialogReportPost(false)}>Αναφορά</Button>
         </DialogActions>
       </Dialog>
     </>

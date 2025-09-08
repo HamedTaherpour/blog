@@ -1,38 +1,37 @@
 import ArchiveSortByListBox from '@/components/ArchiveSortByListBox'
 import ArchiveTabs from '@/components/ArchiveTabs'
-import CardAuthorBox2 from '@/components/CardAuthorBoxs/CardAuthorBox2'
 import CardCategory2 from '@/components/CategoryCards/CardCategory2'
 import PaginationWrapper from '@/components/PaginationWrapper'
 import Card11 from '@/components/PostCards/Card11'
 import { getSearchResults } from '@/data/search'
+import { generatePageMetadata } from '@/lib/metadata'
 import { ButtonCircle } from '@/shared/Button'
 import Input from '@/shared/Input'
 import Tag from '@/shared/Tag'
 import { Link } from '@/shared/link'
 import { ArrowRightIcon } from '@heroicons/react/24/solid'
-import { Folder02Icon, LicenseIcon, Search01Icon, Tag02Icon, UserListIcon } from '@hugeicons/core-free-icons'
+import { Folder02Icon, LicenseIcon, Search01Icon, Tag02Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Metadata } from 'next'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 
 const sortByOptions = [
-  { name: 'Most recent', value: 'most-recent' },
-  { name: 'Curated by admin', value: 'curated-by-admin' },
-  { name: 'Most appreciated', value: 'most-appreciated' },
-  { name: 'Most discussed', value: 'most-discussed' },
-  { name: 'Most viewed', value: 'most-viewed' },
-  { name: 'Most liked', value: 'most-liked' },
+  { name: 'Πιο πρόσφατα', value: 'most-recent' },
+  { name: 'Επιλεγμένα από διαχειριστή', value: 'curated-by-admin' },
+  { name: 'Περισσότερο εκτιμημένα', value: 'most-appreciated' },
+  { name: 'Περισσότερο συζητημένα', value: 'most-discussed' },
+  { name: 'Περισσότερο προβεβλημένα', value: 'most-viewed' },
+  { name: 'Περισσότερο αρεσμένα', value: 'most-liked' },
 ]
 const filterTabs = [
   {
-    name: 'Articles',
+    name: 'Άρθρα',
     value: 'posts',
     icon: LicenseIcon,
   },
-  { name: 'Categories', value: 'categories', icon: Folder02Icon },
-  { name: 'Tags', value: 'tags', icon: Tag02Icon },
-  { name: 'Authors', value: 'authors', icon: UserListIcon },
+  { name: 'Κατηγορίες', value: 'categories', icon: Folder02Icon },
+  { name: 'Ετικέτες', value: 'tags', icon: Tag02Icon },
 ]
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
@@ -40,10 +39,11 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
   const { query } = await searchParams
 
-  return {
-    title: `Search results for ${query}`,
-    description: `Search results for ${query}`,
-  }
+  return await generatePageMetadata({
+    title: query ? `Αποτελέσματα αναζήτησης για "${query}"` : 'Αναζήτηση',
+    description: query ? `Αποτελέσματα αναζήτησης για "${query}"` : 'Αναζητήστε στο blog μας',
+    type: 'website',
+  })
 }
 
 const PageSearch = async ({
@@ -63,6 +63,7 @@ const PageSearch = async ({
 
   let searchQuery = (await searchParams)['s']
   let searchTab = (await searchParams)['tab']
+  let page = (await searchParams)['page']
   // example: /search?s=text1&s=text2 => searchQuery = 'text1'
   if (Array.isArray(searchQuery)) {
     searchQuery = searchQuery[0]
@@ -78,42 +79,52 @@ const PageSearch = async ({
     searchTab = filterTabs[0].value // default tab is posts
   }
 
-  const { posts, categories, tags, authors, totalResults, recommendedSearches } = await getSearchResults(
+  if (Array.isArray(page)) {
+    page = page[0]
+  }
+  const currentPage = Number(page || '1')
+  const perPage = searchTab === 'posts' ? 12 : 20
+
+  const results = await getSearchResults(
     searchQuery || '',
-    searchTab as 'posts' | 'categories' | 'tags' | 'authors'
+    searchTab as 'posts' | 'categories' | 'tags',
+    { page: Number.isFinite(currentPage) && currentPage > 0 ? currentPage : 1, perPage }
   )
+
+  const totalResults = (results as any).totalResults as number
+  const recommendedSearches = (results as any).recommendedSearches as string[]
+
+  const hasPosts = (r: unknown): r is { posts: any[] } => Array.isArray((r as any)?.posts)
+  const hasCategories = (r: unknown): r is { categories: any[] } => Array.isArray((r as any)?.categories)
+  const hasTags = (r: unknown): r is { tags: any[] } => Array.isArray((r as any)?.tags)
+
+  const totalPages = Math.max(1, Math.ceil((totalResults || 0) / perPage))
 
   const renderLoopItems = () => {
     switch (searchTab) {
       case 'categories':
         return (
           <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 md:gap-8 lg:mt-10 lg:grid-cols-4 xl:grid-cols-5">
-            {categories?.map((category) => <CardCategory2 key={category.id} category={category} />)}
+            {hasCategories(results) && results.categories.map((category) => (
+              <CardCategory2 key={category.id} category={category} />
+            ))}
           </div>
         )
 
       case 'tags':
         return (
           <div className="mt-12 flex flex-wrap gap-3">
-            {tags?.map((tag) => (
+            {hasTags(results) && results.tags.map((tag) => (
               <Tag key={tag.id} href={`/tag/${tag.handle}`}>
                 {tag.name}
               </Tag>
             ))}
           </div>
         )
-      case 'authors':
-        return (
-          <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 md:gap-8 lg:mt-10 lg:grid-cols-4 xl:grid-cols-5">
-            {authors?.map((author) => (
-              <CardAuthorBox2 className="border border-dashed" key={author.id} author={author} />
-            ))}
-          </div>
-        )
       default:
         return (
           <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-8 lg:mt-10 lg:grid-cols-3 xl:grid-cols-4">
-            {posts?.map((post) => <Card11 key={post.id} post={post} />)}
+            {hasPosts(results) && results.posts.map((post) => <Card11 key={post.id} post={post} />)}
           </div>
         )
     }
@@ -140,15 +151,15 @@ const PageSearch = async ({
             <header className="mx-auto flex w-full max-w-3xl flex-col items-center text-center">
               <h2 className="text-2xl font-semibold sm:text-4xl">{searchQuery}</h2>
               <p className="mt-4 block text-sm">
-                We found {totalResults} results for &quot;{searchQuery}&quot;
+                Βρήκαμε {totalResults} αποτελέσματα για &quot;{searchQuery}&quot;
               </p>
               <form className="relative mt-6 w-full sm:mt-10" action={handleSearch}>
-                <span className="sr-only">Search</span>
+                <span className="sr-only">Αναζήτηση</span>
                 <Input
                   id="s"
                   name="s"
                   type="search"
-                  placeholder="Type and press enter"
+                  placeholder="Πληκτρολογήστε και πατήστε enter"
                   sizeClass="sm:ps-16 py-5 pe-8"
                   defaultValue={searchQuery}
                 />
@@ -164,7 +175,7 @@ const PageSearch = async ({
                 </div>
               </form>
               <div className="mt-4 flex w-full flex-wrap gap-x-1.5 gap-y-2 text-start text-sm sm:gap-x-2.5">
-                <span className="font-normal">Recommended searches:</span>
+                <span className="font-normal">Συνιστώμενες αναζητήσεις:</span>
                 {recommendedSearches.map((search) => (
                   <Link className="font-normal underline" href={`/search?s=${search}`} key={search} scroll={false}>
                     {search}
@@ -186,7 +197,7 @@ const PageSearch = async ({
         {renderLoopItems()}
 
         {/* PAGINATION */}
-        <PaginationWrapper className="mt-20" />
+        <PaginationWrapper className="mt-20" totalPages={totalPages} />
       </div>
     </div>
   )

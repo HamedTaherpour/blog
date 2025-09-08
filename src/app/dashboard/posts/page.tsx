@@ -4,10 +4,12 @@ import { Button } from '@/shared/Button'
 import Input from '@/shared/Input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/Select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/table'
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { PermissionButton, ShowIfCanAccess } from '@/components/PermissionGuard'
 
 interface Post {
   id: string
@@ -145,16 +147,18 @@ export default function PostsPage() {
 
   if (loading && posts.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen dark:bg-gray-900">
         <div className="border-b bg-white px-6 py-4 dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Posts</h1>
-            <Link href="/dashboard/posts/new">
-              <Button className="flex items-center gap-2">
-                <PlusIcon className="h-4 w-4" />
-                Add New Post
-              </Button>
-            </Link>
+            <ShowIfCanAccess resource="posts" action="create">
+              <Link href="/dashboard/posts/new">
+                <Button className="flex items-center gap-2">
+                  <PlusIcon className="h-4 w-4" />
+                  Add New Post
+                </Button>
+              </Link>
+            </ShowIfCanAccess>
           </div>
         </div>
         <div className="flex h-64 items-center justify-center">
@@ -176,12 +180,14 @@ export default function PostsPage() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Posts</h1>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage your blog posts and content</p>
           </div>
-          <Link href="/dashboard/posts/new">
-            <Button className="flex items-center gap-2">
-              <PlusIcon className="h-4 w-4" />
-              Add New Post
-            </Button>
-          </Link>
+          <ShowIfCanAccess resource="posts" action="create">
+            <Link href="/dashboard/posts/new">
+              <Button className="flex items-center gap-2">
+                <PlusIcon className="h-4 w-4" />
+                Add New Post
+              </Button>
+            </Link>
+          </ShowIfCanAccess>
         </div>
       </div>
 
@@ -229,66 +235,75 @@ export default function PostsPage() {
             <CardDescription>{posts.length} posts found</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-              <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
-                <thead className="bg-neutral-50 dark:bg-neutral-800">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Post
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Category
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Created
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200 bg-white dark:divide-neutral-700 dark:bg-neutral-900">
-                  {posts.map((post) => (
-                    <tr key={post.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{post.title}</div>
-                          <div className="text-xs text-neutral-400 dark:text-neutral-500">/{post.slug}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap text-neutral-500 dark:text-neutral-400">
-                        <span className="flex items-center gap-1">
-                          <span>{getPostTypeIcon(post.postType)}</span>
-                          <span>{post.postType}</span>
+            <Table striped>
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Post</TableHeader>
+                  <TableHeader>Type</TableHeader>
+                  <TableHeader>Status</TableHeader>
+                  <TableHeader>Category</TableHeader>
+                  <TableHeader>Author</TableHeader>
+                  <TableHeader>Created</TableHeader>
+                  <TableHeader>Views</TableHeader>
+                  <TableHeader>Actions</TableHeader>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {posts.map((post) => (
+                  <TableRow key={post.id}>
+                    <TableCell>
+                      <div className='max-w-80 truncate'>
+                        <div className="font-medium truncate text-neutral-900 dark:text-neutral-100" title={post.title}>{post.title}</div>
+                        <div className="text-sm truncate text-neutral-500 dark:text-neutral-400" title={post.slug}>/{post.slug}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="flex items-center gap-2">
+                        <span className="text-lg">{getPostTypeIcon(post.postType)}</span>
+                        <span className="text-sm">{post.postType}</span>
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(post.status)}`}
+                      >
+                        {post.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {post.category ? (
+                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          {post.category.name}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap text-neutral-500 dark:text-neutral-400">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(post.status)}`}
-                        >
-                          {post.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap text-neutral-500 dark:text-neutral-400">
-                        {post.category ? (
-                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                            {post.category.name}
-                          </span>
-                        ) : (
-                          <span className="text-neutral-400 dark:text-neutral-500">-</span>
+                      ) : (
+                        <span className="text-neutral-400 dark:text-neutral-500">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {post.author.image && (
+                          <img
+                            src={post.author.image}
+                            alt={post.author.name || post.author.username}
+                            className="h-6 w-6 rounded-full"
+                          />
                         )}
-                      </td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap text-neutral-500 dark:text-neutral-400">
+                        <span className="text-sm">{post.author.name || post.author.username}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-neutral-600 dark:text-neutral-400">
                         {new Date(post.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                        <div className="flex gap-2">
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                        {post._count.views}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <PermissionButton resource="posts" action="update">
                           <Link href={`/dashboard/posts/${post.id}/edit`}>
                             <Button
                               plain
@@ -297,6 +312,8 @@ export default function PostsPage() {
                               <PencilIcon className="h-4 w-4" />
                             </Button>
                           </Link>
+                        </PermissionButton>
+                        <PermissionButton resource="posts" action="delete">
                           <Button
                             plain
                             onClick={() => handleDelete(post.id)}
@@ -304,13 +321,13 @@ export default function PostsPage() {
                           >
                             <TrashIcon className="h-4 w-4" />
                           </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        </PermissionButton>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
             {posts.length === 0 && !loading && (
               <div className="py-12 text-center">
@@ -329,12 +346,14 @@ export default function PostsPage() {
                   Get started by creating your first post.
                 </p>
                 <div className="mt-6">
-                  <Link href="/dashboard/posts/new">
-                    <Button className="flex items-center gap-2">
-                      <PlusIcon className="h-4 w-4" />
-                      Create your first post
-                    </Button>
-                  </Link>
+                  <ShowIfCanAccess resource="posts" action="create">
+                    <Link href="/dashboard/posts/new">
+                      <Button className="flex items-center gap-2">
+                        <PlusIcon className="h-4 w-4" />
+                        Create your first post
+                      </Button>
+                    </Link>
+                  </ShowIfCanAccess>
                 </div>
               </div>
             )}

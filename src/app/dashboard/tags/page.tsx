@@ -2,6 +2,7 @@
 
 import { Button } from '@/shared/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/table'
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -110,68 +111,76 @@ export default function TagsPage() {
             <CardDescription>{tags.length} tags found</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-              <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
-                <thead className="bg-neutral-50 dark:bg-neutral-800">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Slug
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Posts
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Created
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-neutral-500 uppercase dark:text-neutral-400">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200 bg-white dark:divide-neutral-700 dark:bg-neutral-900">
-                  {tags.map((tag) => (
-                    <tr key={tag.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{tag.name}</div>
-                      </td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap text-neutral-500 dark:text-neutral-400">
+            <Table striped>
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Name</TableHeader>
+                  <TableHeader>Slug</TableHeader>
+                  <TableHeader>Posts</TableHeader>
+                  <TableHeader>Usage</TableHeader>
+                  <TableHeader>Created</TableHeader>
+                  <TableHeader>Actions</TableHeader>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tags.map((tag) => (
+                  <TableRow key={tag.id}>
+                    <TableCell>
+                      <div className="font-medium text-neutral-900 dark:text-neutral-100">{tag.name}</div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-neutral-600 dark:text-neutral-400 font-mono">
                         /{tag.slug}
-                      </td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap text-neutral-500 dark:text-neutral-400">
-                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          {tag._count?.posts || 0} posts
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        {tag._count?.posts || 0} posts
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full" 
+                            style={{ 
+                              width: `${Math.min(100, ((tag._count?.posts || 0) / Math.max(...tags.map(t => t._count?.posts || 0))) * 100)}%` 
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                          {Math.round(((tag._count?.posts || 0) / Math.max(...tags.map(t => t._count?.posts || 0))) * 100)}%
                         </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap text-neutral-500 dark:text-neutral-400">
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-neutral-600 dark:text-neutral-400">
                         {new Date(tag.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                        <div className="flex gap-2">
-                          <Link href={`/dashboard/tags/${tag.id}/edit`} prefetch={false}>
-                            <Button
-                              plain
-                              className="p-1 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"
-                            >
-                              <PencilIcon className="h-4 w-4" />
-                            </Button>
-                          </Link>
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Link href={`/dashboard/tags/${tag.id}/edit`} prefetch={false}>
                           <Button
                             plain
-                            onClick={() => handleDelete(tag.id)}
-                            className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
+                            className="p-1 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200"
                           >
-                            <TrashIcon className="h-4 w-4" />
+                            <PencilIcon className="h-4 w-4" />
                           </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        </Link>
+                        <Button
+                          plain
+                          onClick={() => handleDelete(tag.id)}
+                          className="p-1 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
             {tags.length === 0 && (
               <div className="py-12 text-center">

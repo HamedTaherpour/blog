@@ -71,7 +71,7 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
     return settings
   } catch (error) {
     console.error('Error fetching site settings:', error)
-    throw new Error('Failed to fetch site settings')
+    return null
   }
 }
 

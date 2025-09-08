@@ -45,23 +45,23 @@ export default function StructuredData({ post }: StructuredDataProps) {
       author: {
         '@type': 'Person',
         name: post.author.name,
-        url: `${process.env.NEXTAUTH_URL || 'https://example.com'}/author/${post.author.handle}`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com'}/author/${post.author.handle}`,
       },
       publisher: {
         '@type': 'Organization',
-        name: 'NCMAZ Blog',
-        url: process.env.NEXTAUTH_URL || 'https://example.com',
+        name: 'enpap-blog Blog',
+        url: process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com',
         logo: {
           '@type': 'ImageObject',
-          url: `${process.env.NEXTAUTH_URL || 'https://example.com'}/logo.png`,
+          url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com'}/logo.png`,
         },
       },
       mainEntityOfPage: {
         '@type': 'WebPage',
-        '@id': `${process.env.NEXTAUTH_URL || 'https://example.com'}/post/${post.id}`,
+        '@id': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com'}/post/${post.id}`,
       },
-      articleSection: post.categories.map(cat => cat.name).join(', '),
-      keywords: post.tags.map(tag => tag.name).join(', '),
+      articleSection: post.categories.map((cat) => cat.name).join(', '),
+      keywords: post.tags.map((tag) => tag.name).join(', '),
       wordCount: post.content.replace(/<[^>]*>/g, '').split(/\s+/).length,
       inLanguage: 'en-US',
     }

@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import ColorPicker from '@/components/ColorPicker'
 import FileUpload from '@/components/FileUpload'
+import ParentCategorySelector from '@/components/ParentCategorySelector'
 
 export default function NewCategoryPage() {
   const router = useRouter()
@@ -198,6 +199,13 @@ export default function NewCategoryPage() {
                     required
                   />
                 </div>
+                <div>
+                  <ParentCategorySelector
+                    value={formData.parentId}
+                    onChange={(parentId) => setFormData({ ...formData, parentId })}
+                    label="Parent Category"
+                  />
+                </div>
               </CardContent>
             </Card>
 
@@ -276,7 +284,7 @@ export default function NewCategoryPage() {
                     id="canonicalUrl"
                     value={formData.canonicalUrl}
                     onChange={(e) => setFormData({ ...formData, canonicalUrl: e.target.value })}
-                    placeholder="https://example.com/category"
+                    placeholder="/category"
                   />
                 </div>
               </CardContent>
@@ -333,7 +341,7 @@ export default function NewCategoryPage() {
                     id="ogImage"
                     value={formData.ogImage}
                     onChange={(e) => setFormData({ ...formData, ogImage: e.target.value })}
-                    placeholder="https://example.com/og-image.jpg"
+                    placeholder="/og-image.jpg"
                   />
                 </div>
                 <div>
@@ -367,7 +375,7 @@ export default function NewCategoryPage() {
                     id="twitterImage"
                     value={formData.twitterImage}
                     onChange={(e) => setFormData({ ...formData, twitterImage: e.target.value })}
-                    placeholder="https://example.com/twitter-image.jpg"
+                    placeholder="/twitter-image.jpg"
                   />
                 </div>
               </CardContent>

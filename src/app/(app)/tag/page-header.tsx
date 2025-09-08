@@ -30,10 +30,6 @@ const PageHeader = ({ tag, className }: { tag: TTag; className?: string }) => {
       <div className="relative h-32 w-full bg-neutral-100 md:h-48 dark:bg-white/10" />
       <div className="container -mt-16">
         <div className="relative flex flex-col items-start gap-6 rounded-3xl border border-transparent bg-white p-5 shadow-xl md:flex-row md:rounded-4xl lg:p-8 dark:border-neutral-700 dark:bg-neutral-900">
-          {/* AVATAR */}
-          <div className="flex aspect-square w-28 shrink-0 rotate-12 items-center justify-center rounded-2xl shadow-2xl ring-4 ring-white lg:w-36 dark:ring-white/30">
-            <p className="-rotate-12 text-5xl font-light">#</p>
-          </div>
 
           {/* INFO */}
           <div className="flex-1 lg:ps-4">
@@ -45,14 +41,13 @@ const PageHeader = ({ tag, className }: { tag: TTag; className?: string }) => {
               <p className="text-sm/6 text-neutral-600 dark:text-neutral-300">{description}</p>
               <p className="mt-auto flex items-center gap-x-1 text-sm">
                 <HugeiconsIcon icon={Fire03Icon} size={20} />
-                <span>{count} articles</span>
+                <span>{count} άρθρα</span>
               </p>
             </div>
           </div>
 
           {/* ACTIONS */}
           <div className="flex gap-x-2 self-start">
-            <FollowButton className="py-[calc(--spacing(2)-1px)]!" />
             <ShareDropdown handle={handle} />
             <ActionDropdown handle={handle} tag={tag} />
           </div>
@@ -104,24 +99,10 @@ function ActionDropdown({ handle, tag }: { handle: string; tag: TTag }) {
 
   const actions = [
     {
-      name: 'Copy link',
+      name: 'Αντιγραφή συνδέσμου',
       icon: CopyLinkIcon,
       onClick: () => {
         navigator.clipboard.writeText(window.location.href)
-      },
-    },
-    {
-      name: 'Hide tag',
-      icon: ViewOffSlashIcon,
-      onClick: () => {
-        setIsOpenDialogHideAuthor(true)
-      },
-    },
-    {
-      name: 'Report tag',
-      icon: Flag03Icon,
-      onClick: () => {
-        setIsOpenDialogReportPost(true)
       },
     },
   ]
@@ -144,36 +125,36 @@ function ActionDropdown({ handle, tag }: { handle: string; tag: TTag }) {
       {/* DIALOG HIDE AUTHOR */}
       <Dialog open={isOpenDialogHideAuthor} onClose={() => setIsOpenDialogHideAuthor(false)}>
         <DialogTitle>
-          Hide this tag? <span className="font-semibold">({tag.name.trim()})</span>
+          Απόκρυψη αυτής της ετικέτας? <span className="font-semibold">({tag.name.trim()})</span>
         </DialogTitle>
         <DialogBody>
           <p>
-            Are you sure you want to hide the <span className="font-semibold">{tag.name.trim()}</span>? This action will
-            hide all posts from this tag.
+            Είστε σίγουροι ότι θέλετε να αποκρύψετε την <span className="font-semibold">{tag.name.trim()}</span>? Αυτή η ενέργεια θα
+            αποκρύψει όλα τα άρθρα από αυτή την ετικέτα.
           </p>
         </DialogBody>
         <DialogActions>
           <Button plain onClick={() => setIsOpenDialogHideAuthor(false)}>
-            Cancel
+            Ακύρωση
           </Button>
-          <Button onClick={() => setIsOpenDialogHideAuthor(false)}>Hide</Button>
+          <Button onClick={() => setIsOpenDialogHideAuthor(false)}>Απόκρυψη</Button>
         </DialogActions>
       </Dialog>
 
       {/* DIALOG REPORT POST */}
       <Dialog open={isOpenDialogReportPost} onClose={() => setIsOpenDialogReportPost(false)}>
-        <DialogTitle>Report this tag?</DialogTitle>
+        <DialogTitle>Αναφορά αυτής της ετικέτας?</DialogTitle>
         <DialogBody>
           <p>
-            Are you sure you want to report the <span className="font-semibold">&quot;{tag.name.trim()}&quot;</span>?
-            This action will report this tag.
+            Είστε σίγουροι ότι θέλετε να αναφέρετε την <span className="font-semibold">&quot;{tag.name.trim()}&quot;</span>?
+            Αυτή η ενέργεια θα αναφέρει αυτή την ετικέτα.
           </p>
         </DialogBody>
         <DialogActions>
           <Button plain onClick={() => setIsOpenDialogReportPost(false)}>
-            Cancel
+            Ακύρωση
           </Button>
-          <Button onClick={() => setIsOpenDialogReportPost(false)}>Report</Button>
+          <Button onClick={() => setIsOpenDialogReportPost(false)}>Αναφορά</Button>
         </DialogActions>
       </Dialog>
     </>

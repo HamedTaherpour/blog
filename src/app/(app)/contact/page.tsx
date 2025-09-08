@@ -1,40 +1,70 @@
 import SectionSubscribe2 from '@/components/SectionSubscribe2'
-import ButtonPrimary from '@/shared/ButtonPrimary'
+import { prisma } from '@/lib/prisma'
+import { SiteSocialLinks } from '@/components/SiteSocialLinks'
 import { Divider } from '@/shared/divider'
-import { Field, Label } from '@/shared/fieldset'
-import Input from '@/shared/Input'
-import SocialsList from '@/shared/SocialsList'
-import Textarea from '@/shared/Textarea'
-import { Facebook01Icon, InstagramIcon, NewTwitterIcon, YoutubeIcon } from '@hugeicons/core-free-icons'
 import { Metadata } from 'next'
 
-const info = [
+const fallbackInfo = [
   {
-    title: '🗺 ADDRESS',
-    description: 'Photo booth tattooed prism, portland taiyaki hoodie neutra typewriter',
+    title: '🗺 ΔΙΕΥΘΥΝΣΗ',
+    description: '—',
   },
   {
     title: '💌 EMAIL',
-    description: 'example@example.com',
+    description: '—',
   },
   {
-    title: '☎ PHONE',
-    description: '000-123-456-7890',
+    title: '☎ ΤΗΛΕΦΩΝΟ',
+    description: '—',
   },
 ]
 
 export const metadata: Metadata = {
-  title: 'Contact Us',
-  description: 'Explore contact us page',
+  title: 'Επικοινωνία',
+  description: 'Εξερευνήστε τη σελίδα επικοινωνίας',
 }
 
-const PageContact = () => {
+async function getContactSettings() {
+  // Server-side fetch directly from Prisma; ensure settings exist
+  let settings = await prisma.siteSetting.findUnique({ where: { id: 1 } })
+  if (!settings) {
+    settings = await prisma.siteSetting.create({
+      data: {
+        id: 1,
+        siteName: 'My Blog',
+        allowIndexing: true,
+        ogType: 'website',
+        twitterCardType: 'summary',
+      },
+    })
+  }
+  return settings
+}
+
+const PageContact = async () => {
+  const settings = await getContactSettings()
+  const s = settings as any
+  const info = [
+    {
+      title: '🗺 ΔΙΕΥΘΥΝΣΗ',
+      description: (s.contactAddress?.trim?.() as string) || '—',
+    },
+    {
+      title: '💌 EMAIL',
+      description: (s.contactEmail?.trim?.() as string) || '—',
+    },
+    {
+      title: '☎ ΤΗΛΕΦΩΝΟ',
+      description: (s.contactPhone?.trim?.() as string) || '—',
+    },
+  ]
+
   return (
     <div className="pt-10 pb-24 sm:py-24 lg:py-32">
       <div className="container mx-auto max-w-7xl">
         <div className="grid shrink-0 grid-cols-1 gap-x-5 gap-y-12 sm:grid-cols-2">
           <div>
-            <h1 className="max-w-2xl text-4xl font-semibold sm:text-5xl">Contact</h1>
+            <h1 className="max-w-2xl text-4xl font-semibold sm:text-5xl">Επικοινωνία</h1>
             <div className="mt-10 flex max-w-sm flex-col gap-y-8 sm:mt-20">
               {info.map((item, index) => (
                 <div key={index}>
@@ -43,52 +73,14 @@ const PageContact = () => {
                 </div>
               ))}
               <div>
-                <h3 className="text-sm font-semibold tracking-wider uppercase dark:text-neutral-200">🌏 SOCIALS</h3>
-                <SocialsList 
-                  className="mt-4" 
-                  socials={[
-                    {
-                      name: 'Facebook',
-                      href: '#',
-                      icon: Facebook01Icon,
-                    },
-                    {
-                      name: 'Twitter',
-                      href: '#',
-                      icon: NewTwitterIcon,
-                    },
-                    {
-                      name: 'Instagram',
-                      href: '#',
-                      icon: InstagramIcon,
-                    },
-                    {
-                      name: 'YouTube',
-                      href: '#',
-                      icon: YoutubeIcon,
-                    },
-                  ]}
-                />
+                <h3 className="text-sm font-semibold tracking-wider uppercase dark:text-neutral-200">
+                  🌏 ΚΟΙΝΩΝΙΚΑ ΔΙΚΤΥΑ
+                </h3>
+                <SiteSocialLinks className="flex gap-4 mt-2" />
               </div>
             </div>
           </div>
-          <form className="grid grid-cols-1 gap-6" action="#" method="post">
-            <Field className="block">
-              <Label>Full name</Label>
-              <Input placeholder="Example Doe" type="text" className="mt-1" />
-            </Field>
-            <Field className="block">
-              <Label>Email address</Label>
-              <Input type="email" placeholder="example@example.com" className="mt-1" />
-            </Field>
-            <Field className="block">
-              <Label>Message</Label>
-              <Textarea className="mt-1" rows={6} />
-            </Field>
-            <div>
-              <ButtonPrimary type="submit">Send Message</ButtonPrimary>
-            </div>
-          </form>
+          {/* Contact form removed as requested */}
         </div>
       </div>
 
